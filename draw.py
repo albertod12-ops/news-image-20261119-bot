@@ -53,6 +53,12 @@ F_ART2 = font("DejaVuSans-Bold.ttf", 17)
 F_ART2_S = font("DejaVuSans-Bold.ttf", 11)
 F_FOC = font("DejaVuSans-Bold.ttf", 30)
 F_FOC_S = font("DejaVuSans-Bold.ttf", 12)
+F_FOC23 = font("DejaVuSans-Bold.ttf", 20)   # 2/3 of F_FOC (hero 1 only)
+F_FOC23_S = font("DejaVuSans-Bold.ttf", 8)  # 2/3 of F_FOC_S
+F_LBL = font("DejaVuSans-Bold.ttf", 16)     # 2/3 of F_ART (hero 3 label)
+F_LBL_S = font("DejaVuSans-Bold.ttf", 8)    # 2/3 of F_ART_S
+F_LBL2 = font("DejaVuSans-Bold.ttf", 11)    # 2/3 of F_ART2 (small-card labels)
+F_LBL2_S = font("DejaVuSans-Bold.ttf", 7)   # 2/3 of F_ART2_S
 F_ALSO = font("DejaVuSans.ttf", 11)
 F_ALSO_N = font("DejaVuSans-Bold.ttf", 11)
 F_SEC = font("DejaVuSans-Bold.ttf", 12)
@@ -587,11 +593,11 @@ def main():
         im = art_image(key, hw, 96)
         idd = ImageDraw.Draw(im)
         if num == 1:
-            focal_text(idd, 0, 0, hw, 96, big, small, F_FOC, F_FOC_S, "YELLOW", True)
+            focal_text(idd, 0, 0, hw, 96, big, small, F_FOC23, F_FOC23_S, "YELLOW", True)
         elif num == 2:
             focal_text(idd, 0, 0, hw, 96, big, small, F_FOC, F_FOC_S, "WHITE", True)
         else:
-            art_text(im, idd, 0, 0, hw, 96, big, small, F_ART, F_ART_S)
+            art_text(im, idd, 0, 0, hw, 96, big, small, F_LBL, F_LBL_S)
         img.paste(im, (cx, hy))
         d.rectangle([cx, hy + 96, cx + hw, hy + 112], fill=NAVY)
         d.text((cx + 5, hy + 100), "%d  %s \u00b7 %s" % (num, reg, topic),
@@ -616,7 +622,7 @@ def main():
             cy = 348 + r * 166
             im = art_image(key, sw_, 84)
             idd = ImageDraw.Draw(im)
-            art_text(im, idd, 0, 0, sw_, 84, big, small, F_ART2, F_ART2_S)
+            art_text(im, idd, 0, 0, sw_, 84, big, small, F_LBL2, F_LBL2_S)
             img.paste(im, (cx, cy))
             d.rectangle([cx, cy + 84, cx + sw_, cy + 99], fill=NAVY)
             d.text((cx + 4, cy + 87), "%d  %s \u00b7 %s" % (num, reg, topic),
