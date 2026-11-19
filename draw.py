@@ -46,7 +46,7 @@ F_HEAD_S = font("DejaVuSerif-Bold.ttf", 14)
 F_DECK = font("DejaVuSans.ttf", 11)
 F_DECK_S = font("DejaVuSans.ttf", 10)
 F_LABEL = font("DejaVuSans-Bold.ttf", 8)
-F_PIN = font("DejaVuSans-Bold.ttf", 11)
+F_PIN = font("DejaVuSans-Bold.ttf", 10)
 F_ART = font("DejaVuSans-Bold.ttf", 24)
 F_ART_S = font("DejaVuSans-Bold.ttf", 12)
 F_ART2 = font("DejaVuSans-Bold.ttf", 17)
@@ -153,11 +153,11 @@ ALSO = [
     (17, "New Delhi", "schools reopen as smog curbs are lifted"),
     (18, "Canberra", "sanctions three Israelis, four groups"),
     (19, "Mogadishu", "Somalia accuses UAE of secret bases"),
-    (20, "Frankfurt", "Deutsche Bank handled $582m Epstein deals"),
+    (20, "Frankfurt", "Deutsche Bank in $582m Epstein deals"),
     (21, "Washington", "senators warn of AI cyber threats"),
     (22, "Ottawa", "Carney rethinks China ties, seeks right deal"),
     (23, "Tokyo", "India and Japan review defence ties at 2+2"),
-    (24, "Bengaluru", "Amazon pledges $7bn for renewables by 2030"),
+    (24, "Bengaluru", "Amazon $7bn renewables pledge"),
     (25, "Sydney", "Duckett's 133 puts England in charge"),
     (26, "Auckland", "NZ plays England as GTA VI unlocks"),
     (27, "Baghdad", "six French ISIL members jailed"),
@@ -166,9 +166,9 @@ ALSO = [
     (30, "Washington", "Vance: no 'forever war' in the Gulf"),
     (31, "Manama", "Bapco refinery back on its feet after attacks"),
     (32, "Riyadh", "Gulf leaders urge Trump not to strike Iran"),
-    (33, "Washington", "Liu Yuming takes House Democratic chair"),
+    (33, "Washington", "Liu Yuming takes House Dem chair"),
     (34, "Sacramento", "California braces for atmospheric river"),
-    (35, "La Paz", "Bolivia declares El Nino emergency; 78,000 hit"),
+    (35, "La Paz", "Bolivia El Nino emergency; 78,000 hit"),
     (36, "Sydney", "data centres may add 39m t of CO2 a year"),
 ]
 
@@ -496,8 +496,11 @@ def art_image(key, w, h):
     return img
 
 
-# pixel nudges so clustered pins stay readable (map is small)
-PIN_OFF = {8: (12, -10)}
+# pixel nudges so clustered pins stay readable (map is small): the pin circle
+# moves by (dx, dy) and a thin leader line points back to the true spot.
+# Europe/Med cluster: 5 Antalya, 7 Kyiv, 13 Benghazi overlap at true spots;
+# 8 Shenzhen collides with 10 Seoul; 9 Florida crowds 3 New York.
+PIN_OFF = {2: (-12, -14), 5: (-20, 18), 7: (22, -16), 8: (20, 12), 9: (-14, 8)}
 
 
 def draw_map(d, x0, y0, mw, mh):
@@ -520,12 +523,12 @@ def draw_map(d, x0, y0, mw, mh):
                 py = (90.0 - lat) / 180.0 * mh
                 pts.append((px, py))
             md.polygon(pts, fill=255)
-    step = 4
+    step = 3
     for gy in range(0, mh, step):
         for gx in range(0, mw, step):
             if mask.getpixel((gx, gy)):
-                d.ellipse([x0 + gx - 1, y0 + gy - 1, x0 + gx + 1, y0 + gy + 1],
-                          fill=(150, 140, 120))
+                d.ellipse([x0 + gx - 1.5, y0 + gy - 1.5, x0 + gx + 1.5, y0 + gy + 1.5],
+                          fill=(110, 100, 80))
 
     def proj(lon, lat):
         return (x0 + (lon + 180.0) / 360.0 * mw,
@@ -537,11 +540,15 @@ def draw_map(d, x0, y0, mw, mh):
     for n, (lon, lat) in PINS.items():
         px, py = proj(lon, lat)
         dx, dy = PIN_OFF.get(n, (0, 0))
-        px, py = px + dx, py + dy
-        d.ellipse([px - 8, py - 8, px + 8, py + 8], fill=RED, outline="white")
+        if (dx, dy) != (0, 0):
+            # leader line from the true spot to the moved pin circle
+            d.line([px, py, px + dx, py + dy], fill=RED, width=1)
+            d.ellipse([px - 2, py - 2, px + 2, py + 2], fill=RED)
+            px, py = px + dx, py + dy
+        d.ellipse([px - 7, py - 7, px + 7, py + 7], fill=RED, outline="white")
         t = str(n)
         tw = d.textlength(t, font=F_PIN)
-        d.text((px - tw / 2, py - 6), t, font=F_PIN, fill="white")
+        d.text((px - tw / 2, py - 5), t, font=F_PIN, fill="white")
 
 
 def main():
@@ -640,9 +647,10 @@ def main():
     # ---- map + also 680-926 (map taller, also-list roomier) ----
     my = 680
     d.text((12, my), "WHERE IT HAPPENED", font=F_SEC, fill=INK)
-    d.line([12, my + 16, 300, my + 16], fill=INK, width=1)
-    draw_map(d, 12, my + 22, 288, 150)
-    d.text((12, my + 176), "Red numbers 1\u201313, grey dots 14\u201336. Positions approximate.",
+    d.line([12, my + 16, 348, my + 16], fill=INK, width=1)
+    d.rectangle([12, my + 22, 348, my + 172], outline=RULE, width=1)
+    draw_map(d, 12, my + 22, 336, 150)
+    d.text((12, my + 176), "Red numbers 1\u201313, grey dots 14\u201336. Lines point to exact spots.",
            font=F_TTEXT, fill=GREY)
     # stats: one row of 4 under the map
     for si, (val, cap) in enumerate(STATS):
@@ -653,11 +661,11 @@ def main():
         for j, ln in enumerate(clines):
             d.text((sx, sy + 20 + j * 10), ln, font=F_STATC, fill=GREY)
 
-    ax = 316
+    ax = 364
     d.text((ax, my), "ALSO ON THURSDAY 19 NOVEMBER", font=F_SEC, fill=INK)
     d.text((1012, my), "23 MORE STORIES", font=F_SEC, fill=INK, anchor="ra")
     d.line([ax, my + 16, 1012, my + 16], fill=INK, width=1)
-    colw = 344
+    colw = 320
     rows = 12
     for i, (num, city, txt) in enumerate(ALSO):
         col = 0 if i < rows else 1
