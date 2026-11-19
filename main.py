@@ -17,8 +17,9 @@ Run it locally the same way the grader does, with an output directory
 of your own:
     mkdir -p out && MAKEFUN_OUTPUT_DIR=out python3 main.py
 
-A missing source, an empty source, or a copy that does not match the
-source byte for byte is a loud failure (exit 1), never a partial entry.
+A missing source, an empty source, a source that is not a PNG file,
+or a copy that does not match the source byte for byte is a loud
+failure (exit 1), never a partial entry.
 """
 
 # v1 entry (2026-11-19): thirteen flat-vector pictures, leader's front 13.
@@ -46,6 +47,10 @@ def run():
     if SOURCE.stat().st_size == 0:
         print(f"empty source: {SOURCE}", file=sys.stderr)
         return 1
+    with open(SOURCE, "rb") as handle:
+        if handle.read(8) != b"\x89PNG\r\n\x1a\n":
+            print(f"source is not a PNG file: {SOURCE}", file=sys.stderr)
+            return 1
     target_dir = Path(os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output")
     target_dir.mkdir(parents=True, exist_ok=True)
     target = target_dir / "entry.png"
