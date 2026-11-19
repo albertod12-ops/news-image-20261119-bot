@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""news-image-20261119 v1: 36 stories, UTC timeline, region strip, short in-art labels.
+"""news-image-20261119 v2: 36 stories, DeepSeek (100milionseek) art direction.
 Draws entry.png (1024x1024, deterministic) from world.geo.json only.
-Art is flat vector drawn in code (no photo assets), in the style of the
-entries leading the live leaderboard for this day: navy masthead, 3 heroes,
-10 small cards, map + also-strip, DATE CHECK. Every front picture carries a
-short to-the-point label inside the picture itself.
+v2 vs v1: heroes are scenes not name-plates (leaders at a table, NZ midnight
+queue, Nasdaq tower + bell); labels rewritten 2-line rstrike style; region
+counts replaced by a where-the-day-happened line; DATE CHECK shrunk to a
+thin band; lead hero 396 wide; stats $81.3bn / 15.9m / 551,864 / 200,000
+told to move. Every front picture carries a short to-the-point label inside
+the picture itself.
 Run: python3 draw.py  -> writes entry.png in this directory."""
 import json
 import math
@@ -86,31 +88,31 @@ FRONT = [
     (1, "SHENZHEN", "SUMMIT", "AP \u00b7 REUTERS",
      "Trump, Xi and Putin hold first three-way summit",
      "Three nuclear powers meet at APEC; arms control and Iran top the agenda.",
-     "TRUMP \u00b7 XI \u00b7 PUTIN", "FIRST THREE-WAY SUMMIT", "summit"),
+     "SHENZHEN 12:45", "TRUMP\u2013XI\u2013PUTIN FIRST", "summit"),
     (2, "NEW YORK", "GAMES", "ROCKSTAR",
-     "GTA VI arrives after a 13-year wait",
-     "Rockstar's sequel unlocks at midnight in each country, New Zealand first; 15.9m pre-orders banked.",
-     "GTA VI", "ON SALE AFTER 13 YEARS", "gta"),
+     "GTA VI out today, New Zealand first",
+     "Unlocks at midnight in each country; 15.9m pre-orders, $79.99, Metacritic 99.",
+     "GTA VI", "OUT TODAY \u00b7 NZ MIDNIGHT FIRST", "gta"),
     (3, "NASDAQ", "MARKETS", "SEC \u00b7 REUTERS",
      "Anthropic debuts in the biggest IPO on record",
      "Priced at $83, above its range, the Claude maker raised $81.3bn and is valued near $1.5tn.",
-     "ANT $83", "BIGGEST IPO EVER", "anthropic"),
+     "ANT $83", "$81.3BN RAISED", "anthropic"),
     (4, "THE HAGUE", "LAW", "ICJ",
-     "World Court rules on Rohingya case",
-     "The ICJ reads its judgment in The Gambia's case.",
-     "ICJ RULES", "ROHINGYA CASE", "icj"),
+     "World Court reads Rohingya judgment",
+     "The ICJ reads its judgment in The Gambia's case at 10:00 in The Hague.",
+     "ICJ READS", "ROHINGYA JUDGMENT", "icj"),
     (5, "ANTALYA", "CLIMATE", "UNFCCC",
      "COP31 enters its final 48 hours",
      "Ministers take over the text; the $120bn adaptation fund is still open.",
-     "FINAL 48 HOURS", "$120BN AT STAKE", "cop31"),
+     "COP31", "FINAL 48H \u00b7 $120BN", "cop31"),
     (6, "ODISHA", "STORM", "IMD",
      "Akvan bears down on Odisha",
      "Landfall near Puri due Friday; gusts 145 km/h; schools shut.",
-     "AKVAN", "200,000 TO MOVE", "akvan"),
+     "AKVAN", "200,000 TOLD TO MOVE", "akvan"),
     (7, "KYIV", "WAR", "WHITE HOUSE",
      "Ukraine watches Shenzhen summit",
      "The war will not be raised at the summit, the White House says.",
-     "OFF THE AGENDA", "UKRAINE WATCHES", "ukraine"),
+     "UKRAINE", "LEFT OFF AGENDA", "ukraine"),
     (8, "SHENZHEN", "TRADE", "APEC",
      "APEC leaders adopt the Shenzhen Declaration",
      "Twenty-one economies back digital trade and a community roadmap.",
@@ -122,19 +124,19 @@ FRONT = [
     (10, "SEOUL", "EDUCATION", "YONHAP",
      "Half a million sit Korea's Suneung exam",
      "551,864 take the exam; flights pause, AI-cheat checks tightened.",
-     "551,864 SIT", "ONE EXAM", "suneung"),
+     "551,864 SIT", "FLIGHTS PAUSED", "suneung"),
     (11, "BOGOTA", "LABOUR", "CUT",
      "Colombia's unions strike nationwide",
      "Workers and teachers march against the Economic Rescue tax bill.",
-     "NATIONAL STRIKE", "TAX BILL", "colombia"),
+     "NATIONAL STRIKE", "CUT + FECODE", "colombia"),
     (12, "CANBERRA", "ECONOMY", "ABS",
      "Australia's jobless rate rises to 4.9%",
      "Highest since 2021; 44,000 fewer employed in October.",
-     "JOBLESS 4.9%", "5-YEAR HIGH", "australia"),
+     "JOBLESS 4.9%", "HIGHEST SINCE 2021", "australia"),
     (13, "BENGHAZI", "CRIME", "AP",
      "Cocaine and millions of pills seized in Libya",
      "Officials display one of the country's biggest drug hauls, seized in the east.",
-     "BIGGEST HAUL", "BENGHAZI", "libya"),
+     "BENGHAZI HAUL", "SIZE UNVERIFIED", "libya"),
 ]
 
 # num, city, text
@@ -167,8 +169,8 @@ ALSO = [
 STATS = [
     ("$81.3bn", "Anthropic IPO"),
     ("15.9m", "GTA VI pre-orders"),
-    ("200,000", "Akvan moves"),
     ("551,864", "Suneung sitters"),
+    ("200,000", "told to move"),
 ]
 
 PINS = {
@@ -290,12 +292,19 @@ def art_image(key, w, h):
     d = ImageDraw.Draw(img)
     if key == "summit":
         d.rectangle([0, 0, w, h], fill=(16, 32, 68))
-        d.ellipse([w - 52, 6, w - 14, 44], fill=(255, 210, 31))
-        _skyline(d, w, h, h, (8, 18, 44), 7)
-        for i, kind in enumerate(["us", "cn", "ru"]):
-            fx = 18 + i * (w // 3)
-            d.line([fx + 14, 18, fx + 14, 62], fill=(200, 200, 200), width=2)
-            _flag(d, fx, 20, 34, 22, kind)
+        _skyline(d, w, h, h - 34, (8, 18, 44), 7)
+        # wall clock 12:45, top right (focal text occupies the centre top)
+        d.ellipse([w - 46, 6, w - 24, 28], fill="white")
+        d.line([w - 35, 17, w - 35, 9], fill=NAVY, width=2)
+        d.line([w - 35, 17, w - 30, 13], fill=NAVY, width=2)
+        d.text((w - 35, 32), "12:45", font=F_SRC, fill="white", anchor="ma")
+        # three leaders seated at one round table (below the focal text)
+        d.rectangle([w * 0.08, h - 24, w * 0.92, h - 12], fill=(90, 60, 30))
+        for i in range(3):
+            cx = int(w * (0.22 + i * 0.28))
+            d.ellipse([cx - 9, h - 42, cx + 9, h - 24], fill=(230, 200, 160))
+            d.polygon([(cx - 13, h - 24), (cx + 13, h - 24), (cx + 8, h - 40),
+                       (cx - 8, h - 40)], fill=(20, 20, 20) if i != 1 else (180, 30, 30))
     elif key == "gta":
         for i in range(h):
             t = i / h
@@ -310,6 +319,17 @@ def art_image(key, w, h):
                 d.line([px + 2, h - 60, px + 2 + int(22 * math.sin(math.radians(a))),
                         h - 60 - int(14 * abs(math.cos(math.radians(a))))],
                        fill=(10, 30, 10), width=2)
+        # NZ midnight: clock striking 12 top right, queue outside a shop, PS5 box
+        d.ellipse([w - 40, 6, w - 14, 32], fill="white")
+        d.line([w - 27, 19, w - 27, 10], fill=NAVY, width=2)
+        d.line([w - 27, 19, w - 22, 15], fill=NAVY, width=2)
+        d.rectangle([w - 52, h - 26, w - 12, h - 8], fill=(10, 10, 30),
+                    outline="white", width=1)
+        d.text((w - 32, h - 17), "PS5", font=F_SRC, fill="white", anchor="mm")
+        for i in range(4):
+            cx = 30 + i * 18
+            d.ellipse([cx - 5, h - 16, cx + 5, h - 6], fill=(230, 200, 160))
+            d.rectangle([cx - 7, h - 6, cx + 7, h], fill=(20, 20, 40))
     elif key == "anthropic":
         d.rectangle([0, 0, w, h], fill=(6, 48, 36))
         for gy in range(0, h, 16):
@@ -321,6 +341,13 @@ def art_image(key, w, h):
         for i, (cx, cy) in enumerate(pts[1:-1]):
             col = (60, 220, 120) if i % 2 == 0 else (230, 70, 60)
             d.rectangle([cx - 3, cy - 8, cx + 3, cy + 8], fill=col)
+        # Nasdaq tower with ANT screen + opening bell
+        d.rectangle([w - 40, 6, w - 8, h - 40], fill=(10, 20, 40),
+                    outline=(255, 210, 31), width=1)
+        d.text((w - 24, 16), "ANT", font=F_SRC, fill=(255, 210, 31), anchor="ma")
+        d.text((w - 24, 30), "$83", font=F_SRC, fill="white", anchor="ma")
+        d.arc([12, 6, 40, 30], 180, 360, fill=GOLD, width=3)
+        d.ellipse([24, 30, 28, 36], fill=GOLD)
     elif key == "icj":
         d.rectangle([0, 0, w, h], fill=(214, 206, 188))
         d.polygon([(w * 0.2, 26), (w * 0.8, 26), (w * 0.5, 8)], fill=(120, 110, 95))
@@ -329,6 +356,11 @@ def art_image(key, w, h):
             d.rectangle([cx, 28, cx + 10, h - 12], fill=(240, 234, 220),
                         outline=(120, 110, 95))
         d.rectangle([0, h - 12, w, h], fill=(120, 110, 95))
+        # nameplates Gambia v Myanmar (footprints dropped: scrim covers the bottom)
+        d.rectangle([8, 34, 52, 46], fill=NAVY)
+        d.text((30, 40), "GAMBIA", font=F_SRC, fill="white", anchor="mm")
+        d.rectangle([w - 60, 34, w - 8, 46], fill=NAVY)
+        d.text((w - 34, 40), "MYANMAR", font=F_SRC, fill="white", anchor="mm")
     elif key == "cop31":
         d.rectangle([0, 0, w, h], fill=(18, 80, 140))
         d.ellipse([w // 2 - 26, 8, w // 2 + 26, 60], fill=(40, 140, 90))
@@ -337,6 +369,11 @@ def art_image(key, w, h):
         d.rectangle([w - 26, 14, w - 18, h - 14], fill="white")
         d.rectangle([w - 26, h - 30, w - 18, h - 14], fill=(220, 40, 40))
         d.ellipse([w - 30, h - 22, w - 14, h - 6], fill=(220, 40, 40))
+        # 48-hour hourglass top left + draft page stamped 2035 top right
+        d.polygon([(14, 8), (34, 8), (24, 22), (14, 36), (34, 36), (24, 22)],
+                  fill=(255, 210, 31))
+        d.rectangle([w - 78, 8, w - 34, 22], fill="white")
+        d.text((w - 56, 15), "2035", font=F_SRC, fill=NAVY, anchor="mm")
     elif key == "akvan":
         d.rectangle([0, 0, w, h], fill=(10, 50, 110))
         cx, cy = w // 2, h // 2 + 4
@@ -344,16 +381,37 @@ def art_image(key, w, h):
             d.arc([cx - r, cy - r, cx + r, cy + r], 20, 300,
                   fill=(255, 255, 255), width=3)
         d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=(255, 210, 31))
+        # arrows inland, top left (scrim covers the bottom) + 145 km/h gauge
+        for i in range(3):
+            ax = 14 + i * 22
+            d.line([ax, 14, ax + 12, 14], fill=YELLOW, width=2)
+            d.polygon([(ax + 12, 10), (ax + 12, 18), (ax + 18, 14)],
+                      fill=YELLOW)
+        d.text((w - 8, 8), "145 km/h", font=F_SRC, fill="white", anchor="ra")
     elif key == "ukraine":
         d.rectangle([0, 0, w, h // 2], fill=(0, 90, 180))
         d.rectangle([0, h // 2, w, h], fill=(255, 210, 31))
         d.ellipse([w // 2 - 8, h // 2 - 14, w // 2 + 8, h // 2 + 14],
                   fill=RED, outline="white", width=2)
+        # empty chair top right + folded flag in a closed briefcase top left
+        d.rectangle([w - 44, 12, w - 12, 16], fill=(90, 60, 30))
+        d.rectangle([w - 42, 16, w - 38, 30], fill=(90, 60, 30))
+        d.rectangle([w - 18, 16, w - 14, 30], fill=(90, 60, 30))
+        d.rectangle([12, 10, 52, 22], fill=(60, 40, 20))
+        d.rectangle([14, 12, 32, 20], fill=(0, 90, 180))
+        d.rectangle([34, 12, 50, 20], fill=(255, 210, 31))
     elif key == "apec":
         d.rectangle([0, 0, w, h], fill=(14, 90, 90))
         _skyline(d, w, h, h, (8, 50, 55), 21)
         d.ellipse([w // 2 - 16, 10, w // 2 + 16, 42], fill=GOLD)
         d.text((w // 2, 26), "21", font=F_ART2, fill=NAVY, anchor="mm")
+        # ring of mini flags along the bottom edge (signed page dropped: scrim covers it)
+        for i in range(7):
+            fx = 10 + i * (w - 20) // 7
+            d.rectangle([fx, h - 8, fx + 8, h - 3],
+                        fill=[(178, 34, 52), (222, 41, 16), (0, 60, 180),
+                              (255, 210, 31), (30, 140, 80), (20, 150, 160),
+                              (200, 40, 40)][i])
     elif key == "florida":
         d.rectangle([0, 0, w, h], fill=(90, 120, 150))
         for i in range(14):
@@ -364,6 +422,14 @@ def art_image(key, w, h):
         d.polygon([(w * 0.12, h - 34), (w * 0.35, h - 52), (w * 0.58, h - 34)],
                   fill=(140, 40, 40))
         d.rectangle([0, h - 10, w, h], fill=(30, 80, 140))
+        # 1-ft ruler top left + rescue boat top right (scrim covers the bottom)
+        d.rectangle([10, 8, 18, 40], fill="white")
+        for i in range(4):
+            d.line([10, 12 + i * 9, 16, 12 + i * 9], fill=NAVY, width=1)
+        d.text((24, 12), "1 FT", font=F_SRC, fill="white")
+        d.polygon([(w - 72, 10), (w - 28, 10), (w - 34, 24),
+                   (w - 66, 24)], fill=(255, 210, 31))
+        d.ellipse([w - 54, 2, w - 44, 12], fill=(230, 200, 160))
     elif key == "suneung":
         d.rectangle([0, 0, w, h], fill=(232, 226, 210))
         d.rectangle([8, 8, w - 8, 26], fill=(40, 60, 90))
@@ -375,6 +441,10 @@ def art_image(key, w, h):
                 d.rectangle([x, y, x + w // 4, y + 16], fill=(150, 120, 80))
                 d.ellipse([x + w // 8 - 6, y - 10, x + w // 8 + 6, y + 2],
                           fill=(230, 200, 160))
+        # plane held overhead, flights paused
+        d.polygon([(w - 70, 14), (w - 30, 18), (w - 70, 22)], fill=(90, 90, 90))
+        d.polygon([(w - 58, 10), (w - 48, 18), (w - 58, 20)], fill=(90, 90, 90))
+        d.line([w - 74, 18, w - 26, 18], fill=RED, width=2)
     elif key == "colombia":
         d.rectangle([0, 0, w, h], fill=(240, 220, 160))
         for i in range(7):
@@ -384,6 +454,12 @@ def art_image(key, w, h):
         d.rectangle([w // 2 - 34, 8, w // 2 + 34, 30], fill="white",
                     outline=RED, width=2)
         d.text((w // 2, 19), "PARO", font=F_ART2_S, fill=RED, anchor="mm")
+        # second union banner top left + torn tax-bill page top right
+        d.rectangle([8, 8, 62, 26], fill=NAVY)
+        d.text((35, 17), "FECODE", font=F_SRC, fill="white", anchor="mm")
+        d.polygon([(w - 40, 8), (w - 12, 8), (w - 16, 24),
+                   (w - 26, 16), (w - 34, 24)], fill="white",
+                  outline=(120, 120, 120))
     elif key == "australia":
         d.rectangle([0, 0, w, h], fill=(245, 240, 228))
         vals = [0.72, 0.6, 0.62, 0.45, 0.3]
@@ -393,6 +469,11 @@ def art_image(key, w, h):
             d.rectangle([x, h - 14 - int(v * (h - 30)), x + bw - 6, h - 14],
                         fill=(200, 40, 40) if i == len(vals) - 1 else (90, 90, 90))
         d.line([(12, 22), (w - 12, h - 22)], fill=RED, width=3)
+        # gauge needle at 4.9% + -44,000 ledger line (both above the scrim)
+        d.arc([w - 56, 4, w - 8, 52], 180, 360, fill=NAVY, width=2)
+        d.line([w - 32, 28, w - 16, 14], fill=RED, width=2)
+        d.text((w - 32, 32), "4.9%", font=F_SRC, fill=NAVY, anchor="ma")
+        d.text((12, 8), "-44,000", font=F_SRC, fill=RED)
     elif key == "libya":
         d.rectangle([0, 0, w, h], fill=(30, 30, 40))
         for i in range(5):
@@ -400,6 +481,12 @@ def art_image(key, w, h):
             d.rounded_rectangle([x, h // 2 - 8, x + 26, h // 2 + 8], radius=8,
                                 fill="white" if i % 2 == 0 else (255, 210, 31))
         d.rectangle([w // 2 - 30, 10, w // 2 + 30, 26], fill=(120, 90, 60))
+        # balance scale with a "?" — quantity unverified, no number shown
+        d.line([w - 30, 8, w - 30, 34], fill=GOLD, width=2)
+        d.line([w - 46, 12, w - 14, 12], fill=GOLD, width=2)
+        d.arc([w - 46, 12, w - 36, 26], 0, 180, fill=GOLD, width=2)
+        d.arc([w - 24, 12, w - 14, 26], 0, 180, fill=GOLD, width=2)
+        d.text((w - 30, 30), "?", font=F_ART2, fill=GOLD, anchor="ma")
     return img
 
 
@@ -469,14 +556,11 @@ def main():
            font=F_EYE, fill="white", anchor="ra")
     d.rectangle([0, 88, W, 91], fill=GOLD)
 
-    # ---- region strip 92-111 ----
-    x = 12
-    segw = (W - 24) / 7.0
-    for name, count, col in REGIONS:
-        d.rectangle([x, 92, x + segw - 2, 111], fill=col)
-        d.text((x + segw / 2 - 1, 97), "%s %d" % (name, count),
-               font=F_REG, fill="white", anchor="ma")
-        x += segw
+    # ---- where-the-day-happened strip 92-111 (no unverifiable region counts) ----
+    d.rectangle([12, 92, 1012, 111], fill=NAVY)
+    d.text((512, 97), "WHERE THE DAY HAPPENED \u2014 SHENZHEN \u00b7 NEW YORK \u00b7 THE HAGUE \u00b7 "
+           "ANTALYA \u00b7 ODISHA \u00b7 SEOUL \u00b7 BOGOT\u00c1 \u00b7 CANBERRA \u00b7 BENGHAZI",
+           font=F_REG, fill="white", anchor="ma")
 
     # ---- UTC timeline 114-154 ----
     d.rectangle([12, 114, 100, 154], fill=RED)
@@ -494,14 +578,17 @@ def main():
             d.text((cx + 5, 130 + j * 11), ln, font=F_TTEXT, fill=INK)
     d.line([12, 156, W - 12, 156], fill=RULE, width=1)
 
-    # ---- heroes 160-342 (3 x 328 wide, art 96 tall) ----
+    # ---- heroes 160-342: lead 396 wide, rails 294 (hierarchy, not equal thirds) ----
     hy = 160
-    hw = 328
+    hws = [396, 294, 294]
     for i, (num, reg, topic, src, head, deck, big, small, key) in enumerate(FRONT[:3]):
-        cx = 12 + i * (hw + 8)
+        hw = hws[i]
+        cx = 12 + sum(hws[:i]) + 8 * i
         im = art_image(key, hw, 96)
         idd = ImageDraw.Draw(im)
-        if num == 2:
+        if num == 1:
+            focal_text(idd, 0, 0, hw, 96, big, small, F_FOC, F_FOC_S, "YELLOW", True)
+        elif num == 2:
             focal_text(idd, 0, 0, hw, 96, big, small, F_FOC, F_FOC_S, "WHITE", True)
         else:
             art_text(im, idd, 0, 0, hw, 96, big, small, F_ART, F_ART_S)
@@ -544,17 +631,17 @@ def main():
                 d.text((cx + 2, cy + 102 + len(lines) * 17 + 1 + j * 12),
                        ln, font=F_DECK_S, fill=(60, 60, 60))
 
-    # ---- map + also 680-926 ----
+    # ---- map + also 680-926 (map taller, also-list roomier) ----
     my = 680
     d.text((12, my), "WHERE IT HAPPENED", font=F_SEC, fill=INK)
     d.line([12, my + 16, 300, my + 16], fill=INK, width=1)
-    draw_map(d, 12, my + 22, 288, 132)
-    d.text((12, my + 158), "Red numbers 1\u201313, grey dots 14\u201336. Positions approximate.",
+    draw_map(d, 12, my + 22, 288, 150)
+    d.text((12, my + 176), "Red numbers 1\u201313, grey dots 14\u201336. Positions approximate.",
            font=F_TTEXT, fill=GREY)
     # stats: one row of 4 under the map
     for si, (val, cap) in enumerate(STATS):
         sx = 12 + si * 74
-        sy = my + 176
+        sy = my + 194
         d.text((sx, sy), val, font=F_STAT_S, fill=NAVY)
         clines = wrap(d, cap, F_STATC, 70, max_lines=2)
         for j, ln in enumerate(clines):
@@ -570,28 +657,26 @@ def main():
         col = 0 if i < rows else 1
         row = i if i < rows else i - rows
         x = ax + col * (colw + 8)
-        y = my + 22 + row * 12
+        y = my + 22 + row * 13
         d.text((x, y), "%d" % num, font=F_ALSO_N, fill=RED)
         full = "%s: %s" % (city, txt)
         lines = wrap(d, full, F_ALSO, colw - 22, max_lines=1)
         d.text((x + 20, y), lines[0] if lines else "", font=F_ALSO, fill=INK)
 
-    # ---- date check 932-972 ----
+    # ---- date check 932-960: thin 2-line band (was a 40px box) ----
     dy = 932
-    d.rectangle([12, dy, 1012, dy + 40], outline=RED, width=2)
-    chk = ("DATE CHECK \u2014 Left out, first reported Wednesday 18 November: the Iranian drone "
-           "interceptions \u00b7 the EU's \u20ac45bn loan for Ukraine \u00b7 the House Democrats' 251\u201311 "
-           "vote for Jeffries \u00b7 Voyager 1, one light-day out, at 10:16 GMT \u00b7 Peltola's Alaska win "
-           "\u00b7 the Saudi all-clear after Houthi alerts \u00b7 the US strikes on Qeshm Island (17 Nov) "
-           "\u00b7 Van Gogh's $190.4m sale in New York. Not yet news on Thursday: Cyclone Akvan's "
-           "landfall (Fri 20 Nov) \u00b7 COP31's final deal (Fri 20 Nov). Claims are attributed to "
-           "whoever made them.")
-    clines = wrap(d, chk, F_DATECHK, 976, max_lines=3)
+    d.rectangle([12, dy, 1012, dy + 28], outline=RED, width=2)
+    chk = ("DATE CHECK \u2014 Left out, first reported Wednesday 18 November: Iranian drone "
+           "interceptions \u00b7 EU's \u20ac45bn loan \u00b7 House 251\u201311 Jeffries vote \u00b7 "
+           "Voyager 1, one light-day out \u00b7 Peltola's Alaska win \u00b7 Saudi all-clear \u00b7 "
+           "Qeshm strikes (17 Nov) \u00b7 Van Gogh's $190.4m sale. Not yet news: Akvan's landfall "
+           "(Fri 20 Nov) \u00b7 COP31's final deal (Fri 20 Nov).")
+    clines = wrap(d, chk, F_DATECHK, 976, max_lines=2)
     for j, ln in enumerate(clines):
         d.text((20, dy + 3 + j * 12), ln, font=F_DATECHK, fill=INK)
 
-    # ---- footer 978-1004 ----
-    fy = 978
+    # ---- footer 966-1004 ----
+    fy = 966
     d.text((512, fy), "Reads at three sizes: the date and 3 leads at thumbnail size \u00b7 "
            "13 pictures at half size \u00b7 all 36 stories at full size.",
            font=F_FOOT, fill=GREY, anchor="ma")
