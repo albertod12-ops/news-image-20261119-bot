@@ -173,23 +173,23 @@ TIMELINE = [
 FRONT = [
     (1, "SHENZHEN", "SUMMIT", "AP \u00b7 REUTERS", "REPORTED",
      "Trump, Xi and Putin hold first three-way summit",
-     "90 minutes, then a 'Declaration on Peace': nuclear risk, energy, UN reform. Kyiv not in the room.",
+     "90 minutes, then a 'Declaration on Peace'. Trump and Putin talked Ukraine alone for 40 minutes; Kyiv not in the room.",
      "SHENZHEN 12:45", "TRUMP\u2013XI\u2013PUTIN FIRST", "summit"),
     (2, "THE HAGUE", "LAW", "ICJ", "REPORTED",
      "World Court: Myanmar committed genocide",
      "First state held liable; 9\u20136, 10,000 killed, reparations ordered.",
      "MYANMAR GUILTY", "9\u20136 \u00b7 FIRST STATE HELD LIABLE", "icj"),
     (3, "ANTALYA", "CLIMATE", "UNFCCC", "REPORTED",
-     "COP31 draft drops fossil fuels",
-     "Ministers take over the text; $120bn aid fund still open.",
-     "COP31", "DRAFT DROPS FOSSIL FUELS", "cop31"),
+     "COP31 draft drops fossil fuels and $120bn aid goal",
+     "Ministers take over for the final 48 hours; $120bn is gone from the draft text.",
+     "COP31", "DRAFT DROPS FOSSIL FUELS · $120BN", "cop31"),
     (4, "NEW YORK", "GAMES", "SENSOR TOWER", "REPORTED",
-     "GTA VI out today, New Zealand first",
-     "Midnight unlocks; 15.9m pre-orders.",
+     "GTA VI out after a 13-year wait",
+     "Unlocks at midnight, New Zealand first; 15.9m pre-orders.",
      "GTA VI", "METACRITIC 99 \u00b7 $79.99", "gta"),
     (5, "NASDAQ", "MARKETS", "SEC \u00b7 REUTERS", "REPORTED",
      "Anthropic IPO debuts, biggest on record",
-     "Priced at $83; raised $81.3bn, valued near $1.5tn.",
+     "Priced at $83; $81.3bn tops SpaceX's $75bn record.",
      "ANT $83", "$81.3BN RAISED", "anthropic"),
     (6, "ODISHA", "STORM", "IMD", "FORECAST",
      "Akvan bears down on Odisha",
@@ -244,21 +244,23 @@ ALSO = [
     (28, "Baghdad", "six French ISIL members jailed"),
     (29, "Caracas", "Hegseth signs US-Venezuela deal"),
     (30, "Washington", "Vance: no 'forever war' in Gulf"),
-    (31, "Seoul", "half a million sit college entrance exam"),
+    (31, "Seoul", "551,864 sit exam; flights paused 35 min"),
     (32, "Washington", "Liu Yuming takes House Dem chair"),
     (33, "Brussels", "EU delays methane rules two years"),
     (34, "Benghazi", "cocaine and millions of pills seized"),
-    (35, "Manama", "Bapco refinery back after attacks"),
+    (35, "Paris", "Greens back Mélenchon; left splits"),
     (36, "La Paz", "Bolivia El Nino emergency; 78,000 hit"),
 ]
 
 STATS = [
     ("3", "presidents, one table"),
     ("$81.3bn", "Anthropic IPO, a record"),
-    ("9\u20136", "World Court genocide vote"),
-    ("109\u20130", "Danish vote on Arctic pact"),
-    ("204,070", "listed to evacuate"),
+    ("9\u20136", "ICJ genocide vote"),
+    ("730,000+", "Rohingya fled in 2017"),
+    ("109\u20130", "Danish Arctic vote"),
+    ("204,070", "listed to move"),
     ("551,864", "Suneung sitters"),
+    ("13 yrs", "since GTA V"),
 ]
 
 LEGEND = [
@@ -279,7 +281,7 @@ DOTS = {
     22: (-77.0, 38.9), 23: (-75.7, 45.4), 24: (139.7, 35.7), 25: (77.6, 13.0),
     26: (56.3, 26.6), 27: (106.8, -6.2), 28: (44.4, 33.3), 29: (-66.9, 10.5),
     30: (-77.0, 38.9), 31: (127.0, 37.5), 32: (-77.0, 38.9), 33: (4.4, 50.8),
-    34: (20.1, 32.1), 35: (50.6, 26.2), 36: (-68.1, -16.5),
+    34: (20.1, 32.1), 35: (2.4, 48.9), 36: (-68.1, -16.5),
 }
 
 PROBLEMS = []
@@ -755,7 +757,7 @@ def main():
     d.rectangle([0, 109, W, 112], fill=GOLD)
 
     # ---- big-numbers strip 111-149 ----
-    sw6 = (W - 24) / 6.0
+    sw6 = (W - 24) / len(STATS)
     for si, (val, cap) in enumerate(STATS):
         sx = 12 + si * sw6
         if si > 0:
