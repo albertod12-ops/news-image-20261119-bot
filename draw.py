@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""news-image-20261119 v6: 36 stories, newspaper front page after the top 1/2.
+"""news-image-20261119 v7: 36 stories, newspaper front page after the top 1.
 Draws entry.png (1024x1024, deterministic) from world.geo.json only.
-v6 vs v5: better fonts + brighter colours for readability — Noto Serif
-Display Black/Bold for the masthead date, headlines and big numbers,
-Noto Sans Black/Bold for kickers, pills and in-art labels, Noto Sans for
-body text; brighter palette (crimson red, vivid blue, brighter green/blue/
-amber pills, gold rule); map gets a light-blue ocean under brighter sand
-continents; art scenes brightened (summit, Anthropic, COP31, Akvan, Kerch,
-Han, Greenland, marathon).
+v7 vs v6: heroes follow news importance like hazel-harbor-63 (ICJ #2, COP31
+#3; GTA VI + Anthropic move to smalls); Riyadh fronted #10 (Houthi missiles,
+sirens 04:42), Suneung demoted to also #31; also-list gains Hormuz (Iran says
+mines set 3 tankers ablaze), Jakarta (asset-seizure law, 18 years) and
+Brussels (EU delays methane rules 2 years) — all verified live 20 Nov; Sudan
+death sentence EXCLUDED (ruled 18 Nov, not 19 Nov); stats swap in 9-6 and
+109-0; summit art gains TRUMP/XI/PUTIN nameplates; hero-1 deck now states
+the verified 90-minute talks and 'Declaration on Peace'; new riyadh art.
 Run: python3 draw.py  -> writes entry.png in this directory."""
 import json
 import math
@@ -90,24 +91,24 @@ TIMELINE = [
 FRONT = [
     (1, "SHENZHEN", "SUMMIT", "AP \u00b7 REUTERS", "REPORTED",
      "Trump, Xi and Putin hold first three-way summit",
-     "Three nuclear powers meet at APEC; arms control and Iran top the agenda. Kyiv was not in the room.",
+     "90 minutes, then a 'Declaration on Peace': nuclear risk, energy, UN reform. Kyiv not in the room.",
      "SHENZHEN 12:45", "TRUMP\u2013XI\u2013PUTIN FIRST", "summit"),
-    (2, "NEW YORK", "GAMES", "SENSOR TOWER", "REPORTED",
-     "GTA VI out today, New Zealand first",
-     "Unlocks at midnight in each country; 15.9m pre-orders, $79.99, Metacritic 99. \u2014 Rockstar",
-     "GTA VI", "OUT TODAY \u00b7 NZ MIDNIGHT FIRST", "gta"),
-    (3, "NASDAQ", "MARKETS", "SEC \u00b7 REUTERS", "REPORTED",
-     "Anthropic debuts in the biggest IPO on record",
-     "Priced at $83, above its range, the Claude maker raised $81.3bn and is valued near $1.5tn.",
-     "ANT $83", "$81.3BN RAISED", "anthropic"),
-    (4, "THE HAGUE", "LAW", "ICJ", "REPORTED",
+    (2, "THE HAGUE", "LAW", "ICJ", "REPORTED",
      "World Court: Myanmar committed genocide",
      "First state held liable; 9\u20136, 10,000 killed, reparations ordered.",
      "MYANMAR GUILTY", "9\u20136 \u00b7 FIRST STATE HELD LIABLE", "icj"),
-    (5, "ANTALYA", "CLIMATE", "UNFCCC", "REPORTED",
+    (3, "ANTALYA", "CLIMATE", "UNFCCC", "REPORTED",
      "COP31 draft drops fossil fuels",
      "Ministers take over the text; $120bn aid fund still open.",
      "COP31", "DRAFT DROPS FOSSIL FUELS", "cop31"),
+    (4, "NEW YORK", "GAMES", "SENSOR TOWER", "REPORTED",
+     "GTA VI out today, New Zealand first",
+     "Midnight unlocks; 15.9m pre-orders, $79.99, Metacritic 99.",
+     "GTA VI", "OUT TODAY \u00b7 NZ MIDNIGHT FIRST", "gta"),
+    (5, "NASDAQ", "MARKETS", "SEC \u00b7 REUTERS", "REPORTED",
+     "Anthropic debuts in the biggest IPO on record",
+     "Priced at $83; raised $81.3bn, valued near $1.5tn.",
+     "ANT $83", "$81.3BN RAISED", "anthropic"),
     (6, "ODISHA", "STORM", "IMD", "FORECAST",
      "Akvan bears down on Odisha",
      "204,070 listed to move; landfall due Friday, gusts 145 km/h.",
@@ -124,10 +125,10 @@ FRONT = [
      "Denmark backs Arctic pact with US",
      "Parliament votes 109\u20130; more US bases in Greenland.",
      "109\u20130", "ARCTIC PACT APPROVED", "greenland"),
-    (10, "SEOUL", "EDUCATION", "YONHAP", "REPORTED",
-     "Half a million sit Korea's Suneung exam",
-     "551,864 take the exam; flights pause, AI-cheat checks tightened.",
-     "551,864 SIT", "FLIGHTS PAUSED", "suneung"),
+    (10, "RIYADH", "WAR", "REUTERS", "REPORTED",
+     "Saudis shoot down Houthi missiles",
+     "Sirens at 04:42; missile intercepted, debris damage.",
+     "OVER RIYADH", "SIRENS 04:42", "riyadh"),
     (11, "BOGOTA", "LABOUR", "CUT", "REPORTED",
      "Colombia's unions strike nationwide",
      "Workers and teachers march against the Economic Rescue tax bill.",
@@ -156,14 +157,14 @@ ALSO = [
     (23, "Ottawa", "Carney rethinks China ties, seeks right deal"),
     (24, "Tokyo", "India and Japan review defence ties at 2+2"),
     (25, "Bengaluru", "Amazon $7bn renewables pledge"),
-    (26, "Sydney", "Duckett's 133 puts England in charge"),
-    (27, "Auckland", "NZ plays England as GTA VI unlocks"),
+    (26, "Hormuz", "Iran says mines set 3 tankers ablaze"),
+    (27, "Jakarta", "asset-seizure law passes after 18 years"),
     (28, "Baghdad", "six French ISIL members jailed"),
     (29, "Caracas", "Hegseth signs a US-Venezuela military deal"),
     (30, "Washington", "Vance: no 'forever war' in the Gulf"),
-    (31, "Riyadh", "Houthi missile intercepted; sirens at 04:42"),
+    (31, "Seoul", "half a million sit college entrance exam"),
     (32, "Washington", "Liu Yuming takes House Dem chair"),
-    (33, "Sydney", "data centres may add 39m t of CO2 a year"),
+    (33, "Brussels", "EU delays methane rules two years"),
     (34, "Benghazi", "cocaine and millions of pills seized"),
     (35, "Manama", "Bapco refinery back on its feet after attacks"),
     (36, "La Paz", "Bolivia El Nino emergency; 78,000 hit"),
@@ -172,8 +173,8 @@ ALSO = [
 STATS = [
     ("3", "presidents, one table"),
     ("$81.3bn", "Anthropic IPO, a record"),
-    ("13 yrs", "between GTA V and GTA VI"),
-    ("730,000+", "Rohingya fled in 2017"),
+    ("9\u20136", "World Court genocide vote"),
+    ("109\u20130", "Danish vote on Arctic pact"),
     ("204,070", "listed to evacuate"),
     ("551,864", "Suneung sitters"),
 ]
@@ -187,15 +188,15 @@ LEGEND = [
 PINS = {
     1: (114.1, 22.5), 2: (174.8, -36.8), 3: (-74.0, 40.7), 4: (4.5, 52.1),
     5: (30.7, 36.9), 6: (85.8, 20.2), 7: (35.4, 45.3), 8: (127.0, 37.5),
-    9: (12.6, 55.7), 10: (127.0, 37.5), 11: (-74.1, 4.7),
+    9: (12.6, 55.7), 10: (46.7, 24.7), 11: (-74.1, 4.7),
     12: (149.1, -35.3), 13: (36.8, -1.3),
 }
 DOTS = {
     14: (34.4, 31.5), 15: (-80.1, 26.1), 16: (-99.1, 19.4), 17: (-0.1, 51.5),
     18: (77.2, 28.6), 19: (149.1, -35.3), 20: (45.3, 2.0), 21: (8.7, 50.1),
     22: (-77.0, 38.9), 23: (-75.7, 45.4), 24: (139.7, 35.7), 25: (77.6, 13.0),
-    26: (151.2, -33.9), 27: (174.8, -36.8), 28: (44.4, 33.3), 29: (-66.9, 10.5),
-    30: (-77.0, 38.9), 31: (46.7, 24.7), 32: (-77.0, 38.9), 33: (151.2, -33.9),
+    26: (56.3, 26.6), 27: (106.8, -6.2), 28: (44.4, 33.3), 29: (-66.9, 10.5),
+    30: (-77.0, 38.9), 31: (127.0, 37.5), 32: (-77.0, 38.9), 33: (4.4, 50.8),
     34: (20.1, 32.1), 35: (50.6, 26.2), 36: (-68.1, -16.5),
 }
 
@@ -315,6 +316,11 @@ def art_image(key, w, h):
             d.ellipse([cx - 9, h - 42, cx + 9, h - 24], fill=(230, 200, 160))
             d.polygon([(cx - 13, h - 24), (cx + 13, h - 24), (cx + 8, h - 40),
                        (cx - 8, h - 40)], fill=(20, 20, 20) if i != 1 else (180, 30, 30))
+        # nameplates on the table front, like the top-1 entry
+        for i, name in enumerate(("TRUMP", "XI", "PUTIN")):
+            cx = int(w * (0.22 + i * 0.28))
+            d.rectangle([cx - 17, h - 23, cx + 17, h - 13], fill="white")
+            d.text((cx, h - 22), name, font=F_LABEL, fill=INK, anchor="ma")
     elif key == "gta":
         for i in range(h):
             t = i / h
@@ -455,6 +461,18 @@ def art_image(key, w, h):
         d.rectangle([w - 16, 8, w - 8, h - 30], fill="white", outline=INK)
         for i in range(0, h - 38, 10):
             d.rectangle([w - 16, 8 + i, w - 8, 8 + i + 5], fill=INK)
+    elif key == "riyadh":
+        d.rectangle([0, 0, w, h], fill=(10, 20, 50))
+        _skyline(d, w, h, h - 30, (6, 12, 34), 11)
+        # missile trail from top right + explosion star
+        d.line([w - 12, 6, w - 60, 34], fill=(255, 220, 120), width=3)
+        cx, cy = w - 62, 36
+        for a in range(0, 360, 45):
+            d.line([cx, cy, cx + int(14 * math.cos(math.radians(a))),
+                    cy + int(14 * math.sin(math.radians(a)))],
+                   fill=YELLOW, width=3)
+        d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=(255, 120, 0))
+        d.ellipse([w - 14, 4, w - 6, 12], fill=(255, 210, 31))
     elif key == "ukraine":
         d.rectangle([0, 0, w, h // 2], fill=(0, 90, 180))
         d.rectangle([0, h // 2, w, h], fill=(255, 210, 31))
@@ -559,9 +577,9 @@ def art_image(key, w, h):
 
 # pixel nudges so clustered pins stay readable (map is small): the pin circle
 # moves by (dx, dy) and a thin leader line points back to the true spot.
-# 5 Antalya crowds 7 Kerch; 8 Seoul (Han) collides with 10 Seoul (Suneung);
-# 9 Copenhagen crowds 4 The Hague.
-PIN_OFF = {2: (-12, -14), 5: (-24, 20), 8: (-16, -14), 9: (16, -12)}
+# 5 Antalya crowds 7 Kerch; 8 Seoul (Han) collides with the Suneung dot;
+# 9 Copenhagen crowds 4 The Hague; 10 Riyadh crowds 7 Kerch.
+PIN_OFF = {2: (-12, -14), 5: (-24, 20), 8: (-16, -14), 9: (16, -12), 10: (14, 10)}
 
 
 def draw_map(d, x0, y0, mw, mh):
@@ -655,9 +673,9 @@ def main():
         cx = 12 + sum(hws[:i]) + 8 * i
         im = art_image(key, hw, 96)
         idd = ImageDraw.Draw(im)
-        if num == 1:
+        if key == "summit":
             focal_text(idd, 0, 0, hw, 96, big, small, F_FOC23, F_FOC23_S, "YELLOW", True)
-        elif num == 2:
+        elif key == "gta":
             focal_text(idd, 0, 0, hw, 96, big, small, F_FOC, F_FOC_S, "WHITE", True)
         else:
             art_text(im, idd, 0, 0, hw, 96, big, small, F_LBL, F_LBL_S)
