@@ -430,10 +430,10 @@ def art_image(key, w, h):
         # warm glow behind the table so the leaders pop out of the dark
         d.ellipse([w * 0.22, 52, w * 0.78, 92], fill=(26, 52, 87))
         d.ellipse([w * 0.30, 58, w * 0.70, 88], fill=(36, 68, 110))
-        # three flags behind the leaders (one flag per leader, like top 1)
-        _flag(d, 72, 40, 30, 20, "us")
-        _flag(d, 183, 40, 30, 20, "cn")
-        _flag(d, 294, 40, 30, 20, "ru")
+        # three flags behind the leaders, 2x size (user: perbesar 2x lipat)
+        _flag(d, 57, 40, 60, 40, "us")
+        _flag(d, 168, 40, 60, 40, "cn")
+        _flag(d, 279, 40, 60, 40, "ru")
         # three leaders seated at one round table (below the focal text)
         d.rectangle([w * 0.08, h - 24, w * 0.92, h - 12], fill=(90, 60, 30))
         d.line([w * 0.08, h - 24, w * 0.92, h - 24], fill=GOLD, width=2)
@@ -466,11 +466,11 @@ def art_image(key, w, h):
             t = i / h
             d.line([0, i, w, i], fill=(int(88 + 120 * t), int(40 + 60 * t),
                                        int(140 - 60 * t)))
-        # sun, right: half-disc clipped by the edge (a sunset, not a logo)
-        d.ellipse([182, 28, 210, 56], fill=(255, 190, 60))
+        # sun, right: a BIG half-disc clipped by the edge, like a sunset
+        d.ellipse([170, 24, 222, 76], fill=(255, 190, 60))
         # palm fronds silhouetted across the sun
         for py in (34, 41, 48):
-            d.line([184, py, 196, py], fill=(40, 20, 60), width=1)
+            d.line([174, py, 196, py], fill=(40, 20, 60), width=1)
         _skyline(d, w, h, h, (10, 5, 20), 11)
         for px in (14, w - 22):
             d.line([px, h - 30, px + 4, h - 62], fill=(10, 30, 10), width=3)
@@ -498,22 +498,18 @@ def art_image(key, w, h):
         d.rectangle([0, 0, w, h], fill=(246, 242, 233))
         for gy in range(0, h, 14):
             d.line([0, gy, w, gy], fill=(180, 190, 210), width=1)
-        # gold stair-step chart climbing to a red arrowhead (DeepSeek v20)
-        steps = [(8, 66), (48, 66), (48, 52), (88, 52), (88, 38),
-                 (128, 38), (128, 24), (168, 24)]
-        for i in range(len(steps) - 1):
-            d.line([steps[i], steps[i + 1]], fill=GOLD, width=3)
-        d.polygon([(168, 26), (184, 18), (168, 10)], fill=RED)
-        # cartoon CEO on the top step, one arm raised at the arrowhead
-        d.ellipse([150, 12, 158, 20], fill=(230, 200, 160))
-        d.ellipse([150, 11, 158, 16], fill=(40, 30, 20))
-        d.rectangle([149, 20, 159, 24], fill=NAVY)
-        d.polygon([(153, 20), (155, 20), (154, 24)], fill=RED)
-        d.line([158, 21, 164, 14], fill=(230, 200, 160), width=2)
-        # navy ticker strip along the bottom right (clear of the text scrim)
-        d.rectangle([100, h - 8, w, h], fill=NAVY)
-        for tx in (108, 124, 140, 156, 172):
-            d.line([tx, h - 6, tx + 8, h - 6], fill=GOLD, width=2)
+        # (v26: the thin stair-step + tiny CEO read as a sketch, not an IPO.
+        # A bold gold bar chart + a big red arrow + the price in a red box.)
+        # four gold bars rising steeply, left to right
+        for i, top in enumerate((58, 46, 34, 22)):
+            x = 24 + i * 40
+            d.rectangle([x, top, x + 24, 70], fill=GOLD)
+        # thick red arrow climbing over the bars
+        d.line([(20, 62), (172, 18)], fill=RED, width=4)
+        d.polygon([(172, 18), (154, 16), (168, 30)], fill=RED)
+        # the IPO price in a bold red box, top-left (like top 1's "IPO $83")
+        d.rectangle([8, 4, 50, 20], fill=RED)
+        d.text((29, 12), "$83", font=F_ART2_S, fill="white", anchor="mm")
     elif key == "icj":
         d.rectangle([0, 0, w, h], fill=(226, 218, 196))
         # pediment + 15 columns: first 9 paper, last 6 ink = the 9-6 vote (DeepSeek v20)
@@ -545,91 +541,101 @@ def art_image(key, w, h):
         d.ellipse([56, 58, 64, 64], fill=GOLD)
     elif key == "cop31":
         d.rectangle([0, 0, w, h], fill=(11, 110, 110))
-        # yellow hourglass, left: two gold-framed triangles + sand stream + pile
-        d.polygon([(22, 8), (74, 8), (48, 44)], fill=(255, 210, 31))
-        d.polygon([(48, 44), (74, 80), (22, 80)], fill=(255, 210, 31))
-        d.line([22, 8, 74, 8], fill=GOLD, width=3)
-        d.line([22, 80, 74, 80], fill=GOLD, width=3)
-        d.line([48, 44, 48, 66], fill=(255, 210, 31), width=3)
-        d.ellipse([38, 72, 58, 78], fill=(255, 210, 31))
-        # sand running out: red level line in the top bulb + falling grains
-        d.line([40, 20, 56, 20], fill=(192, 57, 43), width=2)
-        for gy in (50, 56, 62):
-            d.ellipse([46, gy, 50, gy + 3], fill=(247, 222, 154))
-        # glass highlight on the hourglass left edge
-        d.line([26, 12, 44, 42], fill=(255, 255, 255), width=1)
-        # green globe, right: gold outline + meridian/latitude lines + continents
-        d.ellipse([198, 16, 268, 86], fill=(30, 170, 110), outline=GOLD, width=2)
-        d.line([233, 18, 233, 84], fill=GOLD, width=1)
-        d.line([202, 38, 264, 38], fill=GOLD, width=1)
-        d.line([202, 62, 264, 62], fill=GOLD, width=1)
-        d.ellipse([212, 28, 228, 44], fill=(79, 163, 122))
-        d.ellipse([240, 54, 256, 70], fill=(79, 163, 122))
-        # red thermometer: white tube, mercury stopping short (dropping, not rising)
-        d.rectangle([174, 8, 184, 64], fill="white")
-        d.rectangle([177, 32, 181, 62], fill=(214, 69, 65))
-        d.ellipse([170, 58, 184, 72], fill=(220, 40, 40))
-        for ty in (18, 32, 46):
-            d.line([168, ty, 174, ty], fill=GOLD, width=2)
+        # THE DRAFT ITSELF: a white document with the two cuts struck through.
+        # (v26: the hourglass/globe/thermometer read as abstract symbols;
+        # the document says "draft drops" at a glance.)
+        d.rectangle([16, 6, 180, 52], fill="white", outline=(120, 110, 95))
+        d.text((22, 10), "COP31 DRAFT", font=F_SRC, fill=(20, 20, 20))
+        for ly in (19, 24):
+            d.line([22, ly, 120, ly], fill=(180, 180, 180), width=1)
+        # FOSSIL FUELS struck through in red
+        d.text((22, 27), "FOSSIL FUELS", font=F_ART2_S, fill=RED)
+        d.line([20, 33, 118, 33], fill=RED, width=3)
+        # $120BN struck through in red (kept well above the text scrim)
+        d.text((22, 37), "$120BN", font=F_ART2_S, fill=RED)
+        d.line([20, 43, 78, 43], fill=RED, width=3)
+        # diagonal CUT stamp on the document
+        stamp(img, 128, 6, "CUT")
+        # small globe, top right (the planet the deal is about)
+        d.ellipse([220, 12, 268, 60], fill=(30, 170, 110), outline=GOLD,
+                  width=2)
+        d.ellipse([232, 22, 244, 34], fill=(79, 163, 122))
+        d.ellipse([248, 40, 260, 52], fill=(79, 163, 122))
     elif key == "akvan":
         d.rectangle([0, 0, w, h], fill=(12, 70, 160))
-        # spiral centred left (DeepSeek v20): three paper arcs + navy eye
-        # arcs offset by 120 deg and tapered, so they read as rotation
-        cx, cy = 58, 42
-        d.arc([cx - 22, cy - 22, cx + 22, cy + 22], 20, 300,
+        # (v26: the small spiral + boat did not say "cyclone bearing down
+        # on a coast, 204,070 listed to move". Now the cyclone IS the picture.)
+        # a LARGE cyclone spiral, centred, the dominant element
+        cx, cy = 98, 40
+        d.arc([cx - 32, cy - 32, cx + 32, cy + 32], 20, 300,
               fill="white", width=4)
-        d.arc([cx - 14, cy - 14, cx + 14, cy + 14], 140, 60,
+        d.arc([cx - 24, cy - 24, cx + 24, cy + 24], 140, 60,
               fill="white", width=3)
-        d.arc([cx - 6, cy - 6, cx + 6, cy + 6], 260, 180,
+        d.arc([cx - 16, cy - 16, cx + 16, cy + 16], 260, 180,
+              fill="white", width=3)
+        d.arc([cx - 8, cy - 8, cx + 8, cy + 8], 20, 300,
               fill="white", width=2)
-        d.ellipse([cx - 4, cy - 4, cx + 4, cy + 4], fill=(30, 50, 90))
-        # arrows inland, top left + red warning triangle top right
-        for i in range(3):
-            ax = 14 + i * 22
-            d.line([ax, 14, ax + 12, 14], fill=YELLOW, width=2)
-            d.polygon([(ax + 12, 10), (ax + 12, 18), (ax + 18, 14)],
-                      fill=YELLOW)
+        d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=(30, 50, 90))
+        # the Odisha coast at the bottom, with houses; a yellow arrow shows
+        # people moving inland, away from the sea
+        d.polygon([(0, 80), (0, 68), (60, 66), (120, 68), (196, 66),
+                   (196, 80)], fill=(8, 40, 90))
+        for hx in (130, 160, 185):
+            d.rectangle([hx, 58, hx + 12, 66], fill=(240, 230, 210))
+            d.polygon([(hx, 58), (hx + 12, 58), (hx + 6, 52)],
+                      fill=(180, 60, 40))
+        d.line([170, 64, 170, 48], fill=YELLOW, width=3)
+        d.polygon([(170, 44), (164, 52), (176, 52)], fill=YELLOW)
+        # red warning triangle top right
         d.polygon([(179, 4), (189, 24), (169, 24)], fill=RED,
                   outline=(20, 20, 20))
         d.text((179, 14), "!", font=F_ART2_S, fill=YELLOW, anchor="mm")
-        # coastline + a tiny boat under the spiral, bottom-right (clear of scrim)
-        d.polygon([(120, 80), (120, 70), (140, 66), (160, 70), (180, 66),
-                   (196, 70), (196, 80)], fill=(8, 40, 90))
-        d.polygon([(146, 62), (158, 62), (152, 66)], fill="white")
-        d.line([152, 62, 152, 54], fill="white", width=1)
-        d.line([142, 66, 162, 66], fill=(200, 220, 240), width=1)
     elif key == "kerch":
         d.rectangle([0, 0, w, h], fill=(14, 30, 80))
-        # bridge arc + gold deck with a bevelled gap mid-span, red span sagging
-        d.arc([8, 30, w - 8, h + 30], 200, 340, fill=(150, 150, 150), width=3)
-        d.polygon([(8, h - 40), (100, h - 40), (96, h - 36), (8, h - 36)],
-                  fill=(255, 205, 40))
-        d.polygon([(130, h - 40), (w - 8, h - 40), (w - 8, h - 36),
-                   (134, h - 36)], fill=(255, 205, 40))
-        for px in (30, w - 34):
-            d.line([px, h - 40, px, h - 52], fill=(150, 150, 150), width=2)
-        d.polygon([(100, h - 40), (130, h - 40), (122, h - 28), (108, h - 28)],
-                  fill=(200, 40, 40))
-        # halted train: 3 cars (loco + 2 wagons) with a gold headlight,
-        # and a small figure standing on the deck by the gap (human scale)
-        d.rectangle([130, 48, 148, 58], fill=(180, 30, 30))
-        d.rectangle([150, 46, 166, 58], fill=(200, 40, 40))
-        d.rectangle([168, 48, 182, 58], fill=(180, 30, 30))
-        d.ellipse([162, 51, 166, 55], fill=GOLD)
-        d.ellipse([120, 36, 124, 40], fill=(230, 200, 160))
-        d.line([122, 40, 122, 46], fill=(20, 20, 20), width=2)
-        # four smoke puffs rising on a diagonal from the gap, fading up
-        d.ellipse([96, 20, 108, 30], fill=(200, 200, 200))
-        d.ellipse([106, 12, 120, 24], fill=(220, 220, 220))
-        d.ellipse([116, 4, 130, 16], fill=(235, 235, 235))
-        d.ellipse([126, 0, 140, 10], fill=(245, 245, 245))
+        # (v26: a flat deck + a red sag did not read as a bridge being hit.
+        # Now a real bridge: two pylons, cables, a deck, and the middle span
+        # blown out and dipping into the water.)
+        # water at the bottom
+        d.rectangle([0, 64, w, h], fill=(10, 22, 60))
+        d.line([0, 68, w, 68], fill=(30, 60, 110), width=1)
+        d.line([0, 74, w, 74], fill=(30, 60, 110), width=1)
+        # two pylons
+        d.rectangle([36, 10, 44, 44], fill=(150, 150, 150))
+        d.rectangle([168, 10, 176, 44], fill=(150, 150, 150))
+        # suspension cables from the pylon tops to the deck
+        for x0, y0, x1 in ((40, 10, 8), (40, 10, 120), (172, 10, 160),
+                           (172, 10, 188)):
+            d.line([x0, y0, x1, 40], fill=(150, 150, 150), width=1)
+        # gold deck, left and right of the blown-out middle span
+        d.rectangle([8, 40, 120, 44], fill=(255, 205, 40))
+        d.rectangle([160, 40, 188, 44], fill=(255, 205, 40))
+        # the blown-out span, collapsed into the water (dark red, jagged)
+        d.polygon([(120, 40), (160, 40), (150, 52), (140, 62), (130, 52)],
+                  fill=(120, 30, 30))
+        d.line([120, 40, 140, 62], fill=(200, 60, 40), width=2)
+        d.line([160, 40, 140, 62], fill=(200, 60, 40), width=2)
+        # explosion burst + smoke rising from the break
+        d.ellipse([132, 34, 148, 50], fill=(255, 160, 40))
+        d.ellipse([136, 38, 144, 46], fill=(255, 220, 80))
+        d.ellipse([138, 22, 150, 34], fill=(200, 200, 200))
+        d.ellipse([148, 12, 162, 26], fill=(220, 220, 220))
+        d.ellipse([158, 4, 172, 18], fill=(235, 235, 235))
+        # halted 3-car train on the left deck, headlight on, + a figure by the gap
+        d.rectangle([20, 34, 36, 40], fill=(180, 30, 30))
+        d.rectangle([38, 32, 54, 40], fill=(200, 40, 40))
+        d.rectangle([56, 34, 72, 40], fill=(180, 30, 30))
+        d.ellipse([50, 35, 54, 39], fill=GOLD)
+        d.ellipse([110, 32, 114, 36], fill=(230, 200, 160))
+        d.line([112, 36, 112, 40], fill=(20, 20, 20), width=2)
     elif key == "han":
         d.rectangle([0, 0, w, h], fill=NAVY)
-        # struck-through 15 top left (the overturned sentence): shadowed numerals
-        # + a 5px stamp stroke that overshoots them
-        d.text((16, 12), "15", font=F_ART2, fill=(11, 27, 51))
-        d.text((14, 10), "15", font=F_ART2, fill="white")
-        d.line([10, 27, 34, 7], fill=RED, width=5)
+        # the overturned sentence, big and unmistakable: "15 YEARS" with a
+        # red X through it (v26: the small "15" + single slash was too quiet)
+        d.text((16, 10), "15", font=F_ART, fill=(11, 27, 51))
+        d.text((14, 8), "15", font=F_ART, fill="white")
+        d.text((14, 34), "YEARS", font=F_ART2_S, fill="white")
+        d.line([8, 6, 50, 44], fill=RED, width=4)
+        d.line([50, 6, 8, 44], fill=RED, width=4)
         # diagonal OVERTURNED rubber stamp, top centre (the #1 entry's device)
         stamp(img, 60, 6, "OVERTURNED")
         # gold gavel as a real prop, top right: head + handle + striking block
@@ -644,41 +650,52 @@ def art_image(key, w, h):
         d.polygon([(142, 42), (162, 42), (152, 58)], fill=GOLD)
     elif key == "greenland":
         d.rectangle([0, 0, w, h], fill=(24, 130, 200))
-        # navy sea band, waterline at y58
-        d.rectangle([0, 58, w, h], fill=NAVY)
-        # paper iceberg + second smaller berg, bases on the sea
-        d.polygon([(8, 64), (40, 64), (24, 26)], fill="white")
-        # light-blue facet wedge on the iceberg's right third
-        d.polygon([(24, 26), (40, 64), (32, 64)], fill=(191, 227, 242))
-        # distant floe, smaller and paler (depth plane behind the main berg)
-        d.polygon([(64, 64), (88, 64), (76, 48)], fill=(180, 210, 230))
-        d.polygon([(w * 0.55, 64), (w * 0.72, 52), (w * 0.9, 64)],
-                  fill=(230, 240, 245))
-        # diagonal APPROVED rubber stamp, upper sky (the #1 entry's device)
-        stamp(img, 52, 6, "APPROVED")
-        # two flags stacked on one gold pole, right
-        d.line([148, 14, 148, 52], fill=GOLD, width=2)
-        d.rectangle([148, 14, 164, 24], fill=(200, 20, 40))
-        d.rectangle([148, 18, 164, 20], fill="white")
-        d.rectangle([152, 14, 154, 24], fill="white")
-        _flag(d, 148, 26, 16, 10, "us")
+        # (v26: an iceberg + stacked flags did not say "parliament votes
+        # 109-0 for a pact with the US". Now the vote IS the picture.)
+        # navy sea band, waterline at y62
+        d.rectangle([0, 62, w, h], fill=NAVY)
+        # paper iceberg, bottom-left, with a light-blue facet
+        d.polygon([(8, 62), (50, 62), (30, 34)], fill="white")
+        d.polygon([(30, 34), (50, 62), (40, 62)], fill=(191, 227, 242))
+        # the pact: Danish and US flags planted side by side in the ice
+        d.line([94, 18, 94, 62], fill=GOLD, width=2)
+        d.rectangle([94, 18, 112, 30], fill=(200, 20, 40))
+        d.rectangle([94, 23, 112, 25], fill="white")
+        d.rectangle([99, 18, 101, 30], fill="white")
+        d.line([134, 18, 134, 62], fill=GOLD, width=2)
+        _flag(d, 134, 18, 18, 12, "us")
+        # the vote, in a bold red box top-right
+        d.rectangle([150, 6, 192, 22], fill=RED)
+        d.text((171, 14), "109-0", font=F_ART2_S, fill="white", anchor="mm")
+        # diagonal APPROVED rubber stamp, top-left
+        stamp(img, 8, 6, "APPROVED")
     elif key == "marathon":
         d.rectangle([0, 0, w, h], fill=(246, 241, 226))
-        # track lanes + runner + finish line
+        # (v26: the runner was a stick figure and the ban was a small medal.
+        # Now a bigger, mid-stride runner, the Kenyan flag, and the ban
+        # spelled out: "3 YEARS" + a BANNED stamp + a slashed medal.)
+        # track lanes
         for i in range(3):
             d.line([0, h - 46 + i * 12, w, h - 46 + i * 12], fill=(222, 62, 48),
                    width=2)
-        cx, cy = w // 2 - 10, h - 52
-        d.ellipse([cx - 5, cy - 12, cx + 5, cy - 2], fill=(20, 20, 20))
-        d.line([cx, cy - 2, cx + 4, cy + 12], fill=(20, 20, 20), width=3)
-        d.line([cx, cy + 2, cx - 12, cy - 6], fill=(20, 20, 20), width=3)
-        d.line([cx, cy + 2, cx + 12, cy + 8], fill=(20, 20, 20), width=3)
-        d.line([cx + 4, cy + 12, cx - 6, cy + 22], fill=(20, 20, 20), width=3)
-        d.line([cx + 4, cy + 12, cx + 14, cy + 20], fill=(20, 20, 20), width=3)
-        # white race bib on the runner's chest
-        d.rectangle([85, 29, 91, 35], fill="white")
-        # diagonal BANNED rubber stamp above the medal (the #1 entry's device)
-        stamp(img, 118, 4, "BANNED")
+        # Kenyan flag, top-left (black/red/green with white dividers)
+        d.rectangle([8, 6, 44, 10], fill=(20, 20, 20))
+        d.rectangle([8, 10, 44, 11], fill="white")
+        d.rectangle([8, 11, 44, 15], fill=(200, 30, 30))
+        d.rectangle([8, 15, 44, 16], fill="white")
+        d.rectangle([8, 16, 44, 20], fill=(30, 140, 60))
+        # the ban, spelled out in red, top-centre
+        d.text((98, 6), "3 YEARS", font=F_ART2_S, fill=RED)
+        # a bigger runner, mid-stride, shifted left; white bib on the chest
+        d.ellipse([65, 10, 77, 22], fill=(20, 20, 20))
+        d.line([71, 22, 77, 40], fill=(20, 20, 20), width=4)
+        d.line([71, 26, 59, 18], fill=(20, 20, 20), width=3)
+        d.line([71, 26, 83, 34], fill=(20, 20, 20), width=3)
+        d.line([77, 40, 89, 52], fill=(20, 20, 20), width=3)
+        d.line([77, 40, 65, 54], fill=(20, 20, 20), width=3)
+        d.rectangle([68, 28, 74, 34], fill="white")
+        # diagonal BANNED rubber stamp, top-right, above the medal
+        stamp(img, 142, 4, "BANNED")
         # gold medal with a red circle-slash that fits the medal (the ban)
         d.ellipse([128, 18, 152, 42], fill=GOLD)
         d.ellipse([128, 18, 152, 42], outline=RED, width=3)
@@ -686,16 +703,24 @@ def art_image(key, w, h):
     elif key == "riyadh":
         d.rectangle([0, 0, w, h], fill=(10, 20, 50))
         _skyline(d, w, h, h - 30, (6, 12, 34), 11)
-        # red interceptor trail rising to a gold burst, upper right:
-        # a wedge, thick at launch and needle-thin at the burst
-        d.polygon([(18, 79), (70, 50), (149, 17), (151, 19), (74, 54),
-                   (26, 79)], fill=RED)
-        # soft red glow behind the gold burst so it sits in the sky
-        d.ellipse([138, 4, 162, 28], fill=(120, 20, 20))
-        d.ellipse([144, 10, 156, 22], fill=GOLD)
+        # (v26: only a trail + a burst — no missile to be seen. Now the
+        # missile itself, before the intercept, is the picture.)
+        # the interceptor's red trail, launched from the ground, bottom-left
+        d.polygon([(24, 79), (60, 52), (100, 38), (104, 42), (64, 56),
+                   (28, 79)], fill=RED)
+        # the Houthi missile, flying up-right: grey body, nose cone, fins,
+        # orange flame at the tail
+        d.line([100, 45, 128, 22], fill=(220, 220, 220), width=7)
+        d.polygon([(128, 22), (140, 12), (132, 26)], fill=(220, 220, 220))
+        d.polygon([(100, 45), (88, 56), (94, 50)], fill=(180, 180, 180))
+        d.polygon([(100, 45), (88, 42), (94, 46)], fill=(180, 180, 180))
+        d.polygon([(98, 47), (82, 60), (90, 52)], fill=(255, 140, 40))
+        d.polygon([(96, 48), (86, 56), (90, 52)], fill=(255, 220, 80))
+        # the intercept burst, small and ahead of the missile (upper right)
+        d.ellipse([144, 6, 158, 20], fill=GOLD)
         for a in range(0, 360, 45):
-            d.line([150, 16, 150 + int(12 * math.cos(math.radians(a))),
-                    16 + int(12 * math.sin(math.radians(a)))],
+            d.line([151, 13, 151 + int(9 * math.cos(math.radians(a))),
+                    13 + int(9 * math.sin(math.radians(a)))],
                    fill=YELLOW, width=2)
         # small warm city dots along the base
         for dx in (30, 70, 110, 150, 180):
@@ -759,47 +784,57 @@ def art_image(key, w, h):
         d.line([w - 74, 18, w - 26, 18], fill=RED, width=2)
     elif key == "colombia":
         d.rectangle([0, 0, w, h], fill=(240, 220, 160))
-        # crowd of 7 with faces (dot eyes + mouth on each head)
-        for i in range(7):
-            x = 10 + i * (w // 7)
-            d.ellipse([x, h - 44, x + 16, h - 28], fill=(200, 140, 90))
-            d.ellipse([x + 5, h - 38, x + 7, h - 36], fill=(20, 20, 20))
-            d.ellipse([x + 9, h - 38, x + 11, h - 36], fill=(20, 20, 20))
-            d.line([x + 6, h - 33, x + 10, h - 33], fill=(20, 20, 20),
-                   width=1)
-            d.rectangle([x + 2, h - 28, x + 14, h - 8], fill=(40, 90, 160))
-        # PARO banner as cloth, tilted +3 deg (white + red outline)
-        d.polygon([(w // 2 - 34, 10), (w // 2 + 34, 8), (w // 2 + 34, 28),
-                   (w // 2 - 34, 30)], fill="white", outline=RED, width=2)
-        d.text((w // 2, 19), "PARO", font=F_ART2_S, fill=RED, anchor="mm")
-        # FECODE banner as cloth, tilted -4 deg (navy) + torn tax-bill page
-        d.polygon([(8, 10), (62, 8), (62, 26), (8, 28)], fill=NAVY)
-        d.text((35, 17), "FECODE", font=F_SRC, fill="white", anchor="mm")
-        d.polygon([(w - 40, 8), (w - 12, 8), (w - 16, 24),
-                   (w - 26, 16), (w - 34, 24)], fill="white",
-                  outline=(120, 120, 120))
-        # paper placards held up by the crowd (DeepSeek v20): staggered,
-        # each with a small offset shadow, baselines clear of the scrim
-        for px, py, pw in ((20, 28, 18), (80, 34, 16), (140, 30, 20)):
-            d.rectangle([px + 2, py + 2, px + pw + 2, py + 12],
-                        fill=(216, 203, 182))
-            d.rectangle([px, py, px + pw, py + 10], fill="white",
-                        outline=INK)
+        # (v26: a static row of figures did not say "march". Now they walk,
+        # in stride, down a road, carrying the PARO NACIONAL banner.)
+        # road at the bottom, with a dashed centre line
+        d.rectangle([0, 66, w, h], fill=(120, 110, 100))
+        for dx in range(6, w, 20):
+            d.line([dx, 73, dx + 10, 73], fill="white", width=2)
+        # the PARO NACIONAL banner, carried on two poles at the front
+        d.line([118, 10, 118, 34], fill=(60, 40, 20), width=2)
+        d.line([182, 10, 182, 34], fill=(60, 40, 20), width=2)
+        d.rectangle([110, 10, 190, 28], fill="white", outline=RED, width=2)
+        d.text((150, 19), "PARO NACIONAL", font=F_SRC, fill=RED,
+               anchor="mm")
+        # FECODE banner, top-left
+        d.rectangle([8, 8, 62, 24], fill=NAVY)
+        d.text((35, 16), "FECODE", font=F_SRC, fill="white", anchor="mm")
+        # five marchers walking right, in stride, shirts in varied colours
+        skins = [(200, 140, 90), (220, 180, 140), (180, 120, 80),
+                 (210, 160, 110), (190, 130, 85)]
+        shirts = [(40, 90, 160), (200, 40, 40), (30, 140, 80),
+                  (220, 170, 40), (90, 60, 140)]
+        for i, x in enumerate((18, 52, 86, 120, 154)):
+            d.ellipse([x, 34, x + 12, 46], fill=skins[i])
+            d.ellipse([x + 3, 39, x + 5, 41], fill=(20, 20, 20))
+            d.ellipse([x + 7, 39, x + 9, 41], fill=(20, 20, 20))
+            d.rectangle([x + 1, 46, x + 11, 58], fill=shirts[i])
+            # stride: one leg forward, one back
+            d.line([x + 4, 58, x + 10, 68], fill=(20, 20, 20), width=2)
+            d.line([x + 8, 58, x + 2, 68], fill=(20, 20, 20), width=2)
+            # marchers 2 and 4 hold a placard up on a stick
+            if i in (1, 3):
+                d.line([x + 10, 50, x + 14, 34], fill=(60, 40, 20), width=2)
+                d.rectangle([x + 6, 26, x + 20, 36], fill="white",
+                            outline=INK)
     elif key == "australia":
         d.rectangle([0, 0, w, h], fill=(245, 240, 228))
-        # four navy bars rising left to right (DeepSeek v20), light left edge
-        for i, top in enumerate((52, 42, 32, 22)):
-            x = 24 + i * 40
-            d.rectangle([x, top, x + 16, 70], fill=NAVY)
-            d.line([x + 1, top, x + 1, 70], fill=(217, 210, 196), width=1)
-        # red arrow climbing above the bars
-        d.line([(20, 56), (164, 20)], fill=RED, width=3)
-        d.polygon([(164, 20), (148, 18), (160, 32)], fill=RED)
-        # tallest bar carries a small dark-red cap tick so the eye lands on it
-        d.rectangle([144, 20, 160, 22], fill=(140, 10, 30))
-        # -44,000 in a bold red box, white numerals (the key number, like top 1)
-        d.rectangle([8, 4, 52, 18], fill=RED)
-        d.text((30, 11), "-44,000", font=F_SRC, fill="white", anchor="mm")
+        # (v26: four abstract bars did not say "people lost jobs". Now the
+        # rate is a big red number, and a row of people — two in red — are
+        # the ones who lost their jobs.)
+        # the jobless rate, big and red, top-left (like top 1's "4.9%")
+        d.text((8, 4), "4.9%", font=F_ART, fill=RED)
+        # -44,000 in a bold red box, top-right
+        d.rectangle([140, 4, 190, 20], fill=RED)
+        d.text((165, 12), "-44,000", font=F_SRC, fill="white", anchor="mm")
+        # red arrow climbing (the rate rising), clear of the big number
+        d.line([(70, 50), (180, 26)], fill=RED, width=3)
+        d.polygon([(180, 26), (162, 24), (174, 38)], fill=RED)
+        # a row of six people; the 3rd and 5th are in red (job losses)
+        for i, x in enumerate((16, 44, 72, 100, 128, 156)):
+            col = RED if i in (2, 4) else NAVY
+            d.ellipse([x, 52, x + 10, 62], fill=(200, 140, 90))
+            d.rectangle([x + 1, 62, x + 9, 74], fill=col)
     elif key == "libya":
         d.rectangle([0, 0, w, h], fill=(30, 30, 40))
         for i in range(5):
