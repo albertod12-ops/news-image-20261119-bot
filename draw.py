@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-"""news-image-20261119 v5: 36 stories, newspaper front page after the top 1/2.
+"""news-image-20261119 v6: 36 stories, newspaper front page after the top 1/2.
 Draws entry.png (1024x1024, deterministic) from world.geo.json only.
-v5 vs v4: masthead is the date in serif on paper with a red italic deck
-naming the 3 leads; big-numbers strip (3 / $81.3bn / 13 yrs / 730,000+ /
-204,070 / 551,864); timeline retitled THE DAY BY HOURS with the verified
-04:42 Riyadh sirens beat; front 13 reshuffled to the winners' selection —
-ICJ now states the verdict (9-6 guilty, first state ever held liable),
-Kerch bridge (3rd strike in a week), Han's 15-year term overturned,
-Greenland 109-0, Jepchirchir 3-year EPO ban — all verified live 20 Nov;
-every front story carries a REPORTED/FORECAST status pill and the map is
-filled continents (not dots); HOW SURE ARE WE? legend under the map.
+v6 vs v5: better fonts + brighter colours for readability — Noto Serif
+Display Black/Bold for the masthead date, headlines and big numbers,
+Noto Sans Black/Bold for kickers, pills and in-art labels, Noto Sans for
+body text; brighter palette (crimson red, vivid blue, brighter green/blue/
+amber pills, gold rule); map gets a light-blue ocean under brighter sand
+continents; art scenes brightened (summit, Anthropic, COP31, Akvan, Kerch,
+Han, Greenland, marathon).
 Run: python3 draw.py  -> writes entry.png in this directory."""
 import json
 import math
@@ -18,14 +16,16 @@ from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 W, H = 1024, 1024
-PAPER = (247, 243, 232)
+PAPER = (250, 246, 235)
 INK = (17, 17, 17)
-NAVY = (14, 27, 61)
-RED = (200, 16, 46)
-GOLD = (201, 162, 39)
+NAVY = (16, 62, 150)
+RED = (220, 28, 60)
+GOLD = (232, 178, 36)
 YELLOW = (255, 210, 31)
 GREY = (90, 90, 90)
 RULE = (180, 170, 150)
+OCEAN = (198, 226, 240)
+SAND = (238, 220, 165)
 
 FD = "/usr/share/fonts/truetype/dejavu"
 FNOTO = "/usr/share/fonts/truetype/noto"
@@ -35,45 +35,45 @@ def font(name, size, base=FD):
     return ImageFont.truetype(os.path.join(base, name), size)
 
 
-F_TITLE = font("DejaVuSerif-Bold.ttf", 44)
-F_EYE = font("DejaVuSans-Bold.ttf", 13)
-F_DECKLINE = font("NotoSerif-Italic.ttf", 14, FNOTO)
-F_DATE = font("DejaVuSans-Bold.ttf", 30)
-F_DATE2 = font("DejaVuSans-Bold.ttf", 11)
-F_TTIME = font("DejaVuSans-Bold.ttf", 11)
-F_TTEXT = font("DejaVuSans.ttf", 10)
-F_KICK = font("DejaVuSans-Bold.ttf", 10)
-F_PILL = font("DejaVuSans-Bold.ttf", 8)
-F_SRC = font("DejaVuSans-Bold.ttf", 9)
-F_HEAD = font("DejaVuSerif-Bold.ttf", 17)
-F_HEAD_S = font("DejaVuSerif-Bold.ttf", 14)
-F_DECK = font("DejaVuSans.ttf", 11)
-F_DECK_S = font("DejaVuSans.ttf", 10)
-F_LABEL = font("DejaVuSans-Bold.ttf", 8)
-F_PIN = font("DejaVuSans-Bold.ttf", 10)
-F_ART = font("DejaVuSans-Bold.ttf", 24)
-F_ART_S = font("DejaVuSans-Bold.ttf", 12)
-F_ART2 = font("DejaVuSans-Bold.ttf", 17)
-F_ART2_S = font("DejaVuSans-Bold.ttf", 11)
-F_FOC = font("DejaVuSans-Bold.ttf", 30)
-F_FOC_S = font("DejaVuSans-Bold.ttf", 12)
-F_FOC23 = font("DejaVuSans-Bold.ttf", 20)   # 2/3 of F_FOC (hero 1 only)
-F_FOC23_S = font("DejaVuSans-Bold.ttf", 8)  # 2/3 of F_FOC_S
-F_LBL = font("DejaVuSans-Bold.ttf", 16)     # 2/3 of F_ART (hero 3 label)
-F_LBL_S = font("DejaVuSans-Bold.ttf", 8)    # 2/3 of F_ART_S
-F_LBL2 = font("DejaVuSans-Bold.ttf", 11)    # 2/3 of F_ART2 (small-card labels)
-F_LBL2_S = font("DejaVuSans-Bold.ttf", 7)   # 2/3 of F_ART2_S
-F_ALSO = font("DejaVuSans.ttf", 11)
-F_ALSO_N = font("DejaVuSans-Bold.ttf", 11)
-F_SEC = font("DejaVuSans-Bold.ttf", 12)
-F_STATB = font("DejaVuSerif-Bold.ttf", 17)
-F_STATC = font("DejaVuSans.ttf", 9)
-F_LEGEND = font("DejaVuSans.ttf", 9)
-F_DATECHK = font("DejaVuSans.ttf", 11)
-F_FOOT = font("DejaVuSans.ttf", 10)
+F_TITLE = font("NotoSerifDisplay-Black.ttf", 46, FNOTO)
+F_EYE = font("NotoSans-Black.ttf", 13, FNOTO)
+F_DECKLINE = font("NotoSerif-Italic.ttf", 15, FNOTO)
+F_DATE = font("NotoSans-Black.ttf", 30, FNOTO)
+F_DATE2 = font("NotoSans-Bold.ttf", 11, FNOTO)
+F_TTIME = font("NotoSans-Bold.ttf", 11, FNOTO)
+F_TTEXT = font("NotoSans-Regular.ttf", 10, FNOTO)
+F_KICK = font("NotoSans-Bold.ttf", 10, FNOTO)
+F_PILL = font("NotoSans-Bold.ttf", 8, FNOTO)
+F_SRC = font("NotoSans-Bold.ttf", 9, FNOTO)
+F_HEAD = font("NotoSerifDisplay-Bold.ttf", 18, FNOTO)
+F_HEAD_S = font("NotoSerifDisplay-Bold.ttf", 15, FNOTO)
+F_DECK = font("NotoSans-Regular.ttf", 11, FNOTO)
+F_DECK_S = font("NotoSans-Regular.ttf", 10, FNOTO)
+F_LABEL = font("NotoSans-Bold.ttf", 8, FNOTO)
+F_PIN = font("NotoSans-Bold.ttf", 10, FNOTO)
+F_ART = font("NotoSans-Black.ttf", 24, FNOTO)
+F_ART_S = font("NotoSans-Bold.ttf", 12, FNOTO)
+F_ART2 = font("NotoSans-Black.ttf", 17, FNOTO)
+F_ART2_S = font("NotoSans-Bold.ttf", 11, FNOTO)
+F_FOC = font("NotoSans-Black.ttf", 30, FNOTO)
+F_FOC_S = font("NotoSans-Bold.ttf", 12, FNOTO)
+F_FOC23 = font("NotoSans-Black.ttf", 20, FNOTO)   # 2/3 of F_FOC (hero 1 only)
+F_FOC23_S = font("NotoSans-Bold.ttf", 8, FNOTO)  # 2/3 of F_FOC_S
+F_LBL = font("NotoSans-Black.ttf", 16, FNOTO)     # 2/3 of F_ART (hero 3 label)
+F_LBL_S = font("NotoSans-Bold.ttf", 8, FNOTO)    # 2/3 of F_ART_S
+F_LBL2 = font("NotoSans-Black.ttf", 11, FNOTO)    # 2/3 of F_ART2 (small-card labels)
+F_LBL2_S = font("NotoSans-Bold.ttf", 7, FNOTO)   # 2/3 of F_ART2_S
+F_ALSO = font("NotoSans-Regular.ttf", 11, FNOTO)
+F_ALSO_N = font("NotoSans-Bold.ttf", 11, FNOTO)
+F_SEC = font("NotoSans-Black.ttf", 12, FNOTO)
+F_STATB = font("NotoSerifDisplay-Black.ttf", 19, FNOTO)
+F_STATC = font("NotoSans-Regular.ttf", 9, FNOTO)
+F_LEGEND = font("NotoSans-Regular.ttf", 9, FNOTO)
+F_DATECHK = font("NotoSans-Regular.ttf", 11, FNOTO)
+F_FOOT = font("NotoSans-Regular.ttf", 10, FNOTO)
 
-PILL_COL = {"REPORTED": (30, 140, 80), "FORECAST": (36, 90, 180),
-            "CLAIM": (200, 130, 10)}
+PILL_COL = {"REPORTED": (16, 165, 90), "FORECAST": (20, 110, 230),
+            "CLAIM": (230, 150, 0)}
 
 TIMELINE = [
     ("00:00 NZ", "GTA VI unlocks"),
@@ -302,13 +302,12 @@ def art_image(key, w, h):
     img = Image.new("RGB", (w, h), PAPER)
     d = ImageDraw.Draw(img)
     if key == "summit":
-        d.rectangle([0, 0, w, h], fill=(16, 32, 68))
-        _skyline(d, w, h, h - 34, (8, 18, 44), 7)
-        # wall clock 12:45, top right (focal text occupies the centre top)
+        d.rectangle([0, 0, w, h], fill=(22, 52, 110))
+        _skyline(d, w, h, h - 34, (12, 30, 70), 7)
+        # wall clock 12:45, top right (no label: the focal text says 12:45)
         d.ellipse([w - 46, 6, w - 24, 28], fill="white")
         d.line([w - 35, 17, w - 35, 9], fill=NAVY, width=2)
         d.line([w - 35, 17, w - 30, 13], fill=NAVY, width=2)
-        d.text((w - 35, 32), "12:45", font=F_SRC, fill="white", anchor="ma")
         # three leaders seated at one round table (below the focal text)
         d.rectangle([w * 0.08, h - 24, w * 0.92, h - 12], fill=(90, 60, 30))
         for i in range(3):
@@ -342,9 +341,9 @@ def art_image(key, w, h):
             d.ellipse([cx - 5, h - 16, cx + 5, h - 6], fill=(230, 200, 160))
             d.rectangle([cx - 7, h - 6, cx + 7, h], fill=(20, 20, 40))
     elif key == "anthropic":
-        d.rectangle([0, 0, w, h], fill=(6, 48, 36))
+        d.rectangle([0, 0, w, h], fill=(8, 70, 52))
         for gy in range(0, h, 16):
-            d.line([0, gy, w, gy], fill=(20, 80, 60), width=1)
+            d.line([0, gy, w, gy], fill=(24, 100, 74), width=1)
         pts = [(8, h - 18), (w * 0.25, h - 34), (w * 0.45, h - 26),
                (w * 0.65, h - 48), (w * 0.85, h - 58), (w - 8, h - 66)]
         for i in range(len(pts) - 1):
@@ -360,7 +359,7 @@ def art_image(key, w, h):
         d.arc([12, 6, 40, 30], 180, 360, fill=GOLD, width=3)
         d.ellipse([24, 30, 28, 36], fill=GOLD)
     elif key == "icj":
-        d.rectangle([0, 0, w, h], fill=(214, 206, 188))
+        d.rectangle([0, 0, w, h], fill=(226, 218, 196))
         d.polygon([(w * 0.2, 26), (w * 0.8, 26), (w * 0.5, 8)], fill=(120, 110, 95))
         for i in range(4):
             cx = int(w * (0.22 + i * 0.19))
@@ -373,8 +372,8 @@ def art_image(key, w, h):
         d.rectangle([w - 60, 34, w - 8, 46], fill=NAVY)
         d.text((w - 34, 40), "MYANMAR", font=F_SRC, fill="white", anchor="mm")
     elif key == "cop31":
-        d.rectangle([0, 0, w, h], fill=(18, 80, 140))
-        d.ellipse([w // 2 - 26, 8, w // 2 + 26, 60], fill=(40, 140, 90))
+        d.rectangle([0, 0, w, h], fill=(16, 100, 180))
+        d.ellipse([w // 2 - 26, 8, w // 2 + 26, 60], fill=(30, 170, 110))
         d.ellipse([w // 2 - 18, 16, w // 2 - 2, 30], fill=(30, 110, 200))
         d.ellipse([w // 2 + 4, 34, w // 2 + 20, 52], fill=(30, 110, 200))
         d.rectangle([w - 26, 14, w - 18, h - 14], fill="white")
@@ -386,7 +385,7 @@ def art_image(key, w, h):
         d.rectangle([w - 78, 8, w - 34, 22], fill="white")
         d.text((w - 56, 15), "2035", font=F_SRC, fill=NAVY, anchor="mm")
     elif key == "akvan":
-        d.rectangle([0, 0, w, h], fill=(10, 50, 110))
+        d.rectangle([0, 0, w, h], fill=(12, 70, 160))
         cx, cy = w // 2, h // 2 + 4
         for r in range(34, 4, -6):
             d.arc([cx - r, cy - r, cx + r, cy + r], 20, 300,
@@ -400,7 +399,7 @@ def art_image(key, w, h):
                       fill=YELLOW)
         d.text((w - 8, 8), "145 km/h", font=F_SRC, fill="white", anchor="ra")
     elif key == "kerch":
-        d.rectangle([0, 0, w, h], fill=(8, 16, 44))
+        d.rectangle([0, 0, w, h], fill=(14, 30, 80))
         # bridge arc + deck across the strait, explosion star mid-span
         d.arc([8, 30, w - 8, h + 30], 200, 340, fill=(150, 150, 150), width=3)
         d.rectangle([8, h - 40, w - 8, h - 36], fill=(150, 150, 150))
@@ -417,7 +416,7 @@ def art_image(key, w, h):
         d.ellipse([cx - 14, 8, cx - 4, 18], fill=(180, 180, 180))
         d.ellipse([cx - 2, 2, cx + 10, 14], fill=(200, 200, 200))
     elif key == "han":
-        d.rectangle([0, 0, w, h], fill=(20, 50, 70))
+        d.rectangle([0, 0, w, h], fill=(26, 70, 96))
         d.polygon([(w * 0.2, 30), (w * 0.8, 30), (w * 0.5, 12)], fill=(140, 130, 110))
         for i in range(4):
             cx = int(w * (0.22 + i * 0.19))
@@ -429,8 +428,8 @@ def art_image(key, w, h):
         d.text((14, 10), "15", font=F_ART2, fill="white")
         d.line([10, 26, 34, 8], fill=RED, width=3)
     elif key == "greenland":
-        d.rectangle([0, 0, w, h], fill=(30, 110, 170))
-        d.rectangle([0, h - 26, w, h], fill=(20, 80, 140))
+        d.rectangle([0, 0, w, h], fill=(24, 130, 200))
+        d.rectangle([0, h - 26, w, h], fill=(16, 100, 180))
         # icebergs + Danish flag left, US flag right
         d.polygon([(w * 0.1, h - 26), (w * 0.3, h - 62), (w * 0.5, h - 26)],
                   fill="white")
@@ -441,10 +440,10 @@ def art_image(key, w, h):
         d.rectangle([20, 8, 24, 22], fill="white")
         _flag(d, w - 36, 8, 26, 14, "us")
     elif key == "marathon":
-        d.rectangle([0, 0, w, h], fill=(240, 235, 220))
+        d.rectangle([0, 0, w, h], fill=(246, 241, 226))
         # track lanes + runner + finish line
         for i in range(3):
-            d.line([0, h - 46 + i * 12, w, h - 46 + i * 12], fill=(200, 60, 50),
+            d.line([0, h - 46 + i * 12, w, h - 46 + i * 12], fill=(222, 62, 48),
                    width=2)
         cx, cy = w // 2 - 10, h - 52
         d.ellipse([cx - 5, cy - 12, cx + 5, cy - 2], fill=(20, 20, 20))
@@ -584,7 +583,7 @@ def draw_map(d, x0, y0, mw, mh):
                 pts.append((px, py))
             # filled continents (v5: like the top entries), not dots
             d.polygon([(x0 + px, y0 + py) for px, py in pts],
-                      fill=(222, 208, 170))
+                      fill=SAND)
 
     def proj(lon, lat):
         return (x0 + (lon + 180.0) / 360.0 * mw,
@@ -711,7 +710,7 @@ def main():
     my = 686
     d.text((12, my), "WHERE IT HAPPENED", font=F_SEC, fill=INK)
     d.line([12, my + 16, 348, my + 16], fill=INK, width=1)
-    d.rectangle([12, my + 22, 348, my + 172], outline=RULE, width=1)
+    d.rectangle([12, my + 22, 348, my + 172], fill=OCEAN, outline=RULE, width=1)
     draw_map(d, 12, my + 22, 336, 150)
     d.text((12, my + 176), "Red numbers 1\u201313, dark dots 14\u201336. Lines point to exact spots.",
            font=F_TTEXT, fill=GREY)
