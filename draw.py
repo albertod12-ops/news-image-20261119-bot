@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""news-image-20261119 v14: 36 stories, newspaper front page after the top 1.
+"""news-image-20261119 v15: 36 stories, newspaper front page after the top 1.
 Draws entry.png (1024x1024, deterministic) from world.geo.json only.
-v14 vs v13: user order 2026-11-20 15:44 WIB ("Turunin lagi jadi 68px") —
-Thursday font 72px -> 68px LiberationSerif-Bold (Times, same face as top 1),
-measured 839px wide (v13: 889px). Title stays lowered (drawn at y 6, glyphs
-20..81); red deck line y 83, gold rule 103. Masthead band 0-103; every band
-below shifted -6px from v13 (stats 105, timeline 149, heroes 181, smalls
-369, map 701, date check 953, footer 987, ending ~1010).
+v15 vs v14: user order 2026-11-20 15:49 WIB ("Coba buat garis diatas Thursday
+seperti top 1 itu") — a thin ink rule above the masthead date, like
+hazel-harbor-63's: 1px line at y 17 from x=98 to 1012, between the kicker row
+and the title (kicker ink ends ~y 13, title glyphs start y 20). It starts at
+x=98, not 12, so it does not cut through the red date box. No band shifts.
 Run: python3 draw.py  -> writes entry.png in this directory."""
 import json
 import math
@@ -633,6 +632,7 @@ def main():
     d.text((49, 26), "19", font=F_DATE, fill="white", anchor="ma")
     d.text((49, 60), "THU \u00b7 2026", font=F_DATE2, fill="white", anchor="ma")
     d.text((98, 3), "THE WORLD IN ONE DAY", font=F_EYE, fill=RED)
+    d.line([98, 17, 1012, 17], fill=INK, width=1)
     d.text((98, 6), "Thursday 19 November 2026", font=F_TITLE, fill=INK)
     d.text((98, 83), "Trump, Xi and Putin share one table \u00b7 World Court finds "
            "Myanmar guilty of genocide \u00b7 COP31's draft drops fossil fuels",
