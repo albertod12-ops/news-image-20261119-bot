@@ -174,7 +174,7 @@ FRONT = [
     (1, "SHENZHEN", "SUMMIT", "AP \u00b7 REUTERS", "REPORTED",
      "Trump, Xi and Putin hold first three-way summit",
      "90 minutes, then a 'Declaration on Peace'. Trump and Putin talked Ukraine alone for 40 minutes; Kyiv not in the room.",
-     "SHENZHEN 12:45", "TRUMP\u2013XI\u2013PUTIN FIRST", "summit"),
+     "SHENZHEN 12:45", "", "summit"),
     (2, "THE HAGUE", "LAW", "ICJ", "REPORTED",
      "World Court: Myanmar committed genocide",
      "First state held liable; 9\u20136, 10,000 killed, reparations ordered.",
@@ -249,7 +249,7 @@ ALSO = [
     (33, "Brussels", "EU delays methane rules two years"),
     (34, "Benghazi", "cocaine and millions of pills seized"),
     (35, "Paris", "Greens back Mélenchon; left splits"),
-    (36, "La Paz", "Bolivia El Nino emergency; 78,000 hit"),
+    (36, "La Paz", "Bolivia El Niño emergency; 78,000 hit"),
 ]
 
 STATS = [
@@ -438,8 +438,8 @@ def art_image(key, w, h):
         d.ellipse([8, 8, 28, 28], fill=GOLD)
         d.line([18, 18, 18, 10], fill=NAVY, width=2)
         d.line([18, 18, 23, 14], fill=NAVY, width=2)
-        d.rectangle([60, 58, 82, 72], fill=(10, 10, 30), outline="white", width=1)
-        d.text((71, 65), "PS5", font=F_SRC, fill="white", anchor="mm")
+        d.rectangle([173, 58, 195, 72], fill=(10, 10, 30), outline="white", width=1)
+        d.text((184, 65), "PS5", font=F_SRC, fill="white", anchor="mm")
         for i in range(4):
             cx = 110 + i * 18
             d.ellipse([cx - 5, h - 16, cx + 5, h - 6], fill=(230, 200, 160))
