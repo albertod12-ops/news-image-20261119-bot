@@ -568,10 +568,10 @@ def art_image(key, w, h):
         # FOSSIL FUELS struck through in red, centred (73px wide)
         d.text((98, 27), "FOSSIL FUELS", font=F_ART2_S, fill=RED,
                anchor="mm")
-        d.line([60, 27, 136, 27], fill=RED, width=3)
+        d.line([60, 27, 136, 27], fill=RED, width=2)
         # $120BN struck through in red, centred (41.5px wide)
         d.text((98, 39), "$120BN", font=F_ART2_S, fill=RED, anchor="mm")
-        d.line([75, 39, 121, 39], fill=RED, width=3)
+        d.line([75, 39, 121, 39], fill=RED, width=2)
         # diagonal CUT stamp on the document, clear of the centred text
         stamp(img, 140, 6, "CUT")
         # small globe, top right (the planet the deal is about)
@@ -621,21 +621,24 @@ def art_image(key, w, h):
         d.rectangle([0, 64, w, h], fill=(10, 22, 60))
         d.line([0, 68, w, 68], fill=(30, 60, 110), width=1)
         d.line([0, 74, w, 74], fill=(30, 60, 110), width=1)
-        # two pointed towers (pylon + pointed cap, like the reference) —
-        # bright and thick now, so the silhouette reads at any size
-        for tx in (34, 166):
-            d.rectangle([tx, 8, tx + 10, 44], fill=(210, 210, 210))
-            d.polygon([(tx, 8), (tx + 10, 8), (tx + 5, 0)],
+        # two tall towers with a spire and a crossbeam, like the reference
+        # suspension bridge (v31: the towers are taller and narrower now,
+        # with a proper spire top and a crossbeam, so the silhouette reads
+        # as the reference bridge)
+        for tx in (36, 168):
+            d.rectangle([tx, 10, tx + 8, 44], fill=(210, 210, 210))
+            d.polygon([(tx, 10), (tx + 8, 10), (tx + 4, 0)],
                       fill=(210, 210, 210))
-        # the main suspension cable: side spans + a sagging span between
-        # the tower tops (lowest at the middle, y30) — thick and white
-        d.line([(8, 40), (39, 6)], fill="white", width=2)
-        d.line([(39, 6), (55, 18), (70, 25), (85, 29), (98, 30),
-                (111, 29), (126, 25), (141, 18), (156, 11), (171, 6)],
+            d.rectangle([tx - 2, 16, tx + 10, 19], fill=(210, 210, 210))
+        # the main suspension cable: side spans + a deep sagging span
+        # between the tower tops (lowest at the middle, y32) — thick, white
+        d.line([(8, 42), (40, 6)], fill="white", width=2)
+        d.line([(40, 6), (56, 18), (70, 26), (84, 30), (98, 32),
+                (112, 30), (126, 26), (140, 18), (156, 10), (172, 6)],
                fill="white", width=2)
-        d.line([(171, 6), (188, 40)], fill="white", width=2)
+        d.line([(172, 6), (188, 42)], fill="white", width=2)
         # vertical suspenders from the cable down to the intact deck
-        for sx, sy in ((55, 18), (70, 25), (85, 29), (100, 30), (180, 24)):
+        for sx, sy in ((56, 18), (70, 26), (84, 30), (98, 32), (180, 24)):
             d.line([sx, sy, sx, 40], fill="white", width=1)
         # gold deck, left and right of the blown-out middle span — thicker
         d.rectangle([8, 40, 120, 46], fill=(255, 205, 40))
@@ -672,8 +675,9 @@ def art_image(key, w, h):
         d.text((16, 10), "15", font=F_ART, fill=(11, 27, 51))
         d.text((14, 8), "15", font=F_ART, fill="white")
         d.text((14, 34), "YEARS", font=F_ART2_S, fill="white")
-        # diagonal OVERTURNED rubber stamp, top centre (the #1 entry's device)
-        stamp(img, 60, 6, "OVERTURNED")
+        # (v31: the OVERTURNED stamp is gone — the user found its red box
+        # and red text distracting and unclear. The prohibition ring over
+        # "15 YEARS" already says the sentence is cancelled.)
         # a BIG gold gavel as the court's symbol, top right: head + long
         # handle + striking block (v27: the scales were clutter, removed)
         d.rectangle([140, 30, 168, 36], fill=(91, 58, 30))
@@ -731,15 +735,12 @@ def art_image(key, w, h):
         d.line([70, 52, 82, 64], fill=(20, 20, 20), width=3)
         d.line([70, 52, 58, 66], fill=(20, 20, 20), width=3)
         d.rectangle([61, 40, 67, 46], fill="white")
-        # diagonal BANNED rubber stamp, top-right (v30: big + bold, like
-        # the user's reference stamp, and the text is centred in its box)
-        stamp(img, 128, 4, "BANNED", font=F_STAMP)
-        # gold medal with a BOLD red prohibition sign over it (v29: the
-        # user's reference is a thick red ring + thick diagonal bar, not a
-        # hairline — ring and slash are now 5px)
-        d.ellipse([120, 28, 144, 52], fill=GOLD)
-        d.ellipse([120, 28, 144, 52], outline=RED, width=5)
-        d.line([123, 31, 141, 49], fill=RED, width=5)
+        # (v31: the medal + its red prohibition circle are GONE — the user
+        # found the red circle redundant. The BANNED stamp now sits where
+        # the medal was, so there is one clear "banned" element.)
+        # diagonal BANNED rubber stamp, big + bold like the user's reference
+        # stamp, text centred in its box, placed where the medal was
+        stamp(img, 112, 28, "BANNED", font=F_STAMP)
     elif key == "riyadh":
         d.rectangle([0, 0, w, h], fill=(10, 20, 50))
         _skyline(d, w, h, h - 30, (6, 12, 34), 11)
@@ -755,26 +756,30 @@ def art_image(key, w, h):
         # climbing toward the missile
         d.polygon([(24, 79), (60, 52), (96, 46), (100, 50), (64, 56),
                    (28, 79)], fill=RED)
-        # the Houthi missile, BIG and sleek like the user's reference: a
-        # pointed nose at the tower wall, a tapered body, fins at the tail,
-        # and a long orange flame (v30: the v29 missile was too small to
-        # read at page size)
-        d.polygon([(152, 20), (102, 51), (98, 45)], fill=(220, 220, 220))
-        d.polygon([(100, 48), (86, 60), (96, 50)], fill=(180, 180, 180))
-        d.polygon([(98, 45), (84, 38), (94, 47)], fill=(180, 180, 180))
-        d.polygon([(100, 48), (78, 64), (90, 56)], fill=(255, 140, 40))
-        d.polygon([(98, 49), (84, 60), (90, 56)], fill=(255, 220, 80))
-        # the explosion starting around the missile: orange burst, yellow
-        # core, sparks, smoke and debris
-        d.ellipse([140, 8, 164, 32], fill=(255, 140, 40))
-        d.ellipse([146, 14, 158, 26], fill=(255, 220, 80))
+        # the Houthi missile, drawn like the user's reference missile: a
+        # long cylindrical body, a pointed nose cone, fins at the tail, and
+        # a long orange flame — horizontal, nose at the tower wall, a split
+        # second before impact (v31: the v30 dart was still not the
+        # reference shape)
+        d.rectangle([92, 22, 138, 30], fill=(220, 220, 220))
+        d.polygon([(138, 22), (152, 26), (138, 30)], fill=(220, 220, 220))
+        d.polygon([(92, 22), (98, 14), (104, 22)], fill=(180, 180, 180))
+        d.polygon([(92, 30), (98, 38), (104, 30)], fill=(180, 180, 180))
+        d.polygon([(92, 26), (68, 26), (92, 22)], fill=(255, 140, 40))
+        d.polygon([(92, 26), (68, 26), (92, 30)], fill=(255, 140, 40))
+        d.polygon([(92, 26), (76, 26), (92, 24)], fill=(255, 220, 80))
+        d.polygon([(92, 26), (76, 26), (92, 28)], fill=(255, 220, 80))
+        # the explosion starting around the missile nose: orange burst,
+        # yellow core, sparks, smoke and debris
+        d.ellipse([140, 14, 164, 38], fill=(255, 140, 40))
+        d.ellipse([146, 20, 158, 32], fill=(255, 220, 80))
         for a in range(0, 360, 30):
-            d.line([152, 20, 152 + int(16 * math.cos(math.radians(a))),
-                    20 + int(16 * math.sin(math.radians(a)))],
+            d.line([152, 26, 152 + int(16 * math.cos(math.radians(a))),
+                    26 + int(16 * math.sin(math.radians(a)))],
                    fill=YELLOW, width=2)
-        d.ellipse([132, 2, 144, 12], fill=(200, 200, 200))
-        d.ellipse([160, 0, 172, 10], fill=(180, 180, 180))
-        for dx, dy in ((126, 12), (168, 30), (134, 32), (164, 34)):
+        d.ellipse([132, 8, 144, 18], fill=(200, 200, 200))
+        d.ellipse([160, 4, 172, 14], fill=(180, 180, 180))
+        for dx, dy in ((126, 18), (168, 36), (134, 38), (164, 40)):
             d.rectangle([dx, dy, dx + 2, dy + 2], fill=(255, 200, 100))
         # small warm city dots along the base
         for dx in (30, 70, 110, 150, 180):
