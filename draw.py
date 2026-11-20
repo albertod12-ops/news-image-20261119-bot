@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""news-image-20261119 v17: 36 stories, newspaper front page after the top 1.
+"""news-image-20261119 v19: 36 stories, newspaper front page after the top 1.
 Draws entry.png (1024x1024, deterministic) from world.geo.json only.
 v17 vs v16: user order 2026-11-20 15:58 WIB ("Buat sama seperti sebelumnya,
 tapi jarak antara garis dan text sama, kemudian untuk text di dalam kotak yang
@@ -32,6 +32,15 @@ bottom; DATE CHECK glyphs 968..976 / 980..988 in box 963..991 = 5px top /
 3px bottom. Both texts moved up 1px: timeline "THE DAY" 156 -> 155,
 "BY HOURS" 170 -> 169 (gaps 5/5); DATE CHECK lines dy+1 -> dy+0 and
 dy+13 -> dy+12 (gaps 4/4). No band shifts.
+v19 vs v18: user order 2026-11-20 16:06 WIB ("Bagus, untuk Thursday masih
+terlihat berjarak per huruf, coba buat seperti top 1") — the v16 letter-
+spacing is gone: title back to natural untracked LiberationSerif-Bold
+(Times, same face as top 1) at 68px, which measures 839.3px wide — the same
+width as the tracked 60px, so the width is unchanged but the letters now sit
+naturally. draw_tracked helper removed. 68px glyphs are 61px tall (vs 55),
+so the deck moves 83 -> 84 (glyphs 89..106, 3px below the title) and the
+gold rule 108 -> 109; every band below shifts +1 (stats 111, timeline 155,
+heroes 192, smalls 380, map 712, date check 964, footer 998, ending ~1021).
 NOTE: the first draw.py run right after an edit can render the pre-edit file
 (sizes matched the previous version in v15/v16/v18) — always verify with 2-3
 runs and take the later sha.
@@ -63,18 +72,7 @@ def font(name, size, base=FD):
     return ImageFont.truetype(os.path.join(base, name), size)
 
 
-def draw_tracked(d, x, y, text, fnt, fill, target_w):
-    """Draw text letter-spaced so it spans exactly target_w."""
-    nat = sum(d.textlength(ch, font=fnt) for ch in text)
-    gaps = max(len(text) - 1, 1)
-    track = (target_w - nat) / gaps
-    cx = x
-    for ch in text:
-        d.text((cx, y), ch, font=fnt, fill=fill)
-        cx += d.textlength(ch, font=fnt) + track
-
-
-F_TITLE = font("LiberationSerif-Bold.ttf", 60, FLIB)
+F_TITLE = font("LiberationSerif-Bold.ttf", 68, FLIB)
 F_EYE = font("NotoSans-Black.ttf", 13, FNOTO)
 F_DECKLINE = font("NotoSerif-Italic.ttf", 16, FNOTO)
 F_DATE = font("NotoSans-Black.ttf", 30, FNOTO)
@@ -666,46 +664,46 @@ def main():
     img = Image.new("RGB", (W, H), PAPER)
     d = ImageDraw.Draw(img)
 
-    # ---- masthead 0-108: date in the top-1 face (Liberation Serif Bold = Times) ----
+    # ---- masthead 0-109: date in the top-1 face (Liberation Serif Bold = Times) ----
     d.rectangle([12, 8, 86, 80], fill=RED)
     d.text((49, 12), "NOV", font=F_DATE2, fill="white", anchor="ma")
     d.text((49, 26), "19", font=F_DATE, fill="white", anchor="ma")
     d.text((49, 60), "THU \u00b7 2026", font=F_DATE2, fill="white", anchor="ma")
     d.text((98, 1), "THE WORLD IN ONE DAY", font=F_EYE, fill=RED)
     d.line([98, 20, 1012, 20], fill=INK, width=1)
-    draw_tracked(d, 98, 13, "Thursday 19 November 2026", F_TITLE, INK, 839)
-    d.text((98, 83), "Trump, Xi and Putin share one table \u00b7 World Court finds "
+    d.text((98, 11), "Thursday 19 November 2026", font=F_TITLE, fill=INK)
+    d.text((98, 84), "Trump, Xi and Putin share one table \u00b7 World Court finds "
            "Myanmar guilty of genocide \u00b7 COP31's draft drops fossil fuels",
            font=F_DECKLINE, fill=RED)
     d.text((1012, 1), "36 STORIES \u00b7 7 REGIONS \u00b7 ONE PAGE",
            font=F_EYE, fill=INK, anchor="ra")
-    d.rectangle([0, 108, W, 111], fill=GOLD)
+    d.rectangle([0, 109, W, 112], fill=GOLD)
 
-    # ---- big-numbers strip 110-148 ----
+    # ---- big-numbers strip 111-149 ----
     sw6 = (W - 24) / 6.0
     for si, (val, cap) in enumerate(STATS):
         sx = 12 + si * sw6
         if si > 0:
-            d.line([sx - 6, 116, sx - 6, 148], fill=RULE, width=1)
-        d.text((sx + 4, 114), val, font=F_STATB, fill=NAVY)
-        d.text((sx + 4, 136), cap, font=F_STATC, fill=GREY)
+            d.line([sx - 6, 117, sx - 6, 149], fill=RULE, width=1)
+        d.text((sx + 4, 115), val, font=F_STATB, fill=NAVY)
+        d.text((sx + 4, 137), cap, font=F_STATC, fill=GREY)
 
-    # ---- THE DAY BY HOURS timeline 154-186 ----
-    d.rectangle([12, 154, 100, 186], fill=RED)
-    d.text((56, 155), "THE DAY", font=F_TTIME, fill="white", anchor="ma")
-    d.text((56, 169), "BY HOURS", font=F_TTIME, fill="white", anchor="ma")
+    # ---- THE DAY BY HOURS timeline 155-187 ----
+    d.rectangle([12, 155, 100, 187], fill=RED)
+    d.text((56, 156), "THE DAY", font=F_TTIME, fill="white", anchor="ma")
+    d.text((56, 170), "BY HOURS", font=F_TTIME, fill="white", anchor="ma")
     bx = 104
     bw = (W - 12 - bx) / 8.0
     for i, (t, txt) in enumerate(TIMELINE):
         cx = bx + i * bw
         if i > 0:
-            d.line([cx, 156, cx, 184], fill=RULE, width=1)
-        d.text((cx + 5, 157), t, font=F_TTIME, fill=NAVY)
-        d.text((cx + 5, 169), txt, font=F_TTEXT, fill=INK)
-    d.line([12, 188, W - 12, 188], fill=RULE, width=1)
+            d.line([cx, 157, cx, 185], fill=RULE, width=1)
+        d.text((cx + 5, 158), t, font=F_TTIME, fill=NAVY)
+        d.text((cx + 5, 170), txt, font=F_TTEXT, fill=INK)
+    d.line([12, 189, W - 12, 189], fill=RULE, width=1)
 
-    # ---- heroes 191-373: lead 396 wide, rails 294 (hierarchy, not equal thirds) ----
-    hy = 191
+    # ---- heroes 192-374: lead 396 wide, rails 294 (hierarchy, not equal thirds) ----
+    hy = 192
     hws = [396, 294, 294]
     for i, (num, reg, topic, src, status, head, deck, big, small, key) in enumerate(FRONT[:3]):
         hw = hws[i]
@@ -736,14 +734,14 @@ def main():
             d.text((cx + 3, hy + 116 + len(lines) * 22 + 2 + j * 13),
                    ln, font=F_DECK, fill=(60, 60, 60))
 
-    # ---- smalls 379-705 (2 rows x 5, image 196x84) ----
+    # ---- smalls 380-706 (2 rows x 5, image 196x84) ----
     sw_ = 196
     for r in range(2):
         for c in range(5):
             k = 3 + r * 5 + c
             num, reg, topic, src, status, head, deck, big, small, key = FRONT[k]
             cx = 12 + c * (sw_ + 8)
-            cy = 379 + r * 166
+            cy = 380 + r * 166
             im = art_image(key, sw_, 84)
             idd = ImageDraw.Draw(im)
             art_text(im, idd, 0, 0, sw_, 84, big, small, F_LBL2, F_LBL2_S)
@@ -763,8 +761,8 @@ def main():
                 d.text((cx + 2, cy + 102 + len(lines) * 18 + 1 + j * 13),
                        ln, font=F_DECK_S, fill=(60, 60, 60))
 
-    # ---- map + also 711-951 (map taller, also-list roomier) ----
-    my = 711
+    # ---- map + also 712-952 (map taller, also-list roomier) ----
+    my = 712
     d.text((12, my), "WHERE IT HAPPENED", font=F_SEC, fill=INK)
     d.line([12, my + 16, 348, my + 16], fill=INK, width=1)
     d.rectangle([12, my + 22, 348, my + 172], fill=OCEAN, outline=RULE, width=1)
@@ -795,8 +793,8 @@ def main():
         lines = wrap(d, full, F_ALSO, colw - 22, max_lines=1)
         d.text((x + 20, y), lines[0] if lines else "", font=F_ALSO, fill=INK)
 
-    # ---- date check 963-991: thin 2-line band (was a 40px box) ----
-    dy = 963
+    # ---- date check 964-992: thin 2-line band (was a 40px box) ----
+    dy = 964
     d.rectangle([12, dy, 1012, dy + 28], outline=RED, width=2)
     chk = ("DATE CHECK \u2014 Left out, first reported Wednesday 18 November: Iranian drone "
            "interceptions \u00b7 EU's \u20ac45bn loan \u00b7 House 251\u201311 Jeffries vote \u00b7 "
@@ -807,8 +805,8 @@ def main():
     for j, ln in enumerate(clines):
         d.text((20, dy + j * 12), ln, font=F_DATECHK, fill=INK)
 
-    # ---- footer 997-1020 ----
-    fy = 997
+    # ---- footer 998-1021 ----
+    fy = 998
     d.text((512, fy), "Reads at three sizes: the date and 3 leads at thumbnail size \u00b7 "
            "13 pictures at half size \u00b7 all 36 stories at full size.",
            font=F_FOOT, fill=GREY, anchor="ma")
