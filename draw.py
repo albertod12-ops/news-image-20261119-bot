@@ -443,32 +443,48 @@ def art_image(key, w, h):
         # warm glow behind the table so the leaders pop out of the dark
         d.ellipse([w * 0.22, 52, w * 0.78, 92], fill=(26, 52, 87))
         d.ellipse([w * 0.30, 58, w * 0.70, 88], fill=(36, 68, 110))
-        # three flags behind the leaders, 2x size (user: perbesar 2x lipat)
+        # three flags on GOLD poles behind the leaders, 2x size (v35: the
+        # top-1 entry hangs its flags from gold poles, so ours do too —
+        # a pole at each flag's left edge, ball on top)
+        for fx in (57, 168, 279):
+            d.line([fx, 30, fx, 80], fill=GOLD, width=3)
+            d.ellipse([fx - 3, 26, fx + 3, 32], fill=GOLD)
         _flag(d, 57, 40, 60, 40, "us")
         _flag(d, 168, 40, 60, 40, "cn")
         _flag(d, 279, 40, 60, 40, "ru")
-        # three leaders seated at one round table (below the focal text)
-        d.rectangle([w * 0.08, h - 24, w * 0.92, h - 12], fill=(90, 60, 30))
+        # three leaders, flat cartoon style like the top-1 entry (v35: big
+        # round heads with dot eyes + a smile, distinct hair, solid navy
+        # suits with a white collar and a coloured tie — our own layout,
+        # their visual language)
+        d.rectangle([w * 0.08, h - 24, w * 0.92, h - 12], fill="white")
         d.line([w * 0.08, h - 24, w * 0.92, h - 24], fill=GOLD, width=2)
         for i in range(3):
             cx = int(w * (0.22 + i * 0.28))
-            # suit body
-            d.polygon([(cx - 13, h - 24), (cx + 13, h - 24), (cx + 8, h - 40),
-                       (cx - 8, h - 40)],
-                      fill=(20, 20, 20) if i != 1 else (180, 30, 30))
-            # tie on the chest: Trump crimson, Xi navy, Putin slate
+            # solid navy suit, wider than before
+            d.polygon([(cx - 16, h - 24), (cx + 16, h - 24), (cx + 10, h - 44),
+                       (cx - 10, h - 44)], fill=(25, 50, 110))
+            # white shirt collar + coloured tie
+            d.polygon([(cx - 5, h - 44), (cx + 5, h - 44), (cx, h - 38)],
+                      fill="white")
             tie_col = ((200, 16, 46) if i == 0 else
-                       ((30, 50, 120) if i == 1 else (100, 120, 140)))
-            d.polygon([(cx - 2, 60), (cx + 2, 60), (cx, 66)], fill=tie_col)
-            # head, drawn after the body so it sits on top (was hidden before)
-            d.ellipse([cx - 9, 42, cx + 9, 60], fill=(230, 200, 160))
+                       ((180, 30, 30) if i == 1 else (100, 120, 140)))
+            d.polygon([(cx - 2, h - 40), (cx + 2, h - 40), (cx, h - 30)],
+                      fill=tie_col)
+            # big round head, drawn after the suit so it sits on top
+            d.ellipse([cx - 13, 37, cx + 13, 63], fill=(230, 200, 160))
+            # dot eyes + a small smile (the top-1 face)
+            d.ellipse([cx - 6, 48, cx - 3, 51], fill=(20, 20, 20))
+            d.ellipse([cx + 3, 48, cx + 6, 51], fill=(20, 20, 20))
+            d.arc([cx - 4, 52, cx + 4, 58], 0, 180, fill=(20, 20, 20),
+                  width=1)
             # hair: Trump gold quiff, Xi black side-part, Putin grey buzz
             if i == 0:
-                d.ellipse([cx - 9, 40, cx + 9, 48], fill=(232, 190, 60))
+                d.ellipse([cx - 13, 34, cx + 13, 44], fill=(232, 190, 60))
+                d.ellipse([cx - 2, 32, cx + 13, 42], fill=(232, 190, 60))
             elif i == 1:
-                d.ellipse([cx - 9, 40, cx + 1, 48], fill=(20, 20, 20))
+                d.ellipse([cx - 13, 35, cx + 2, 45], fill=(20, 20, 20))
             else:
-                d.ellipse([cx - 9, 40, cx + 9, 47], fill=(150, 150, 150))
+                d.ellipse([cx - 13, 35, cx + 13, 43], fill=(150, 150, 150))
         # nameplates on the table front, gold like the top-1 entry (DeepSeek v20)
         for i, name in enumerate(("TRUMP", "XI", "PUTIN")):
             cx = int(w * (0.22 + i * 0.28))
@@ -581,11 +597,22 @@ def art_image(key, w, h):
         d.line([75, 39, 121, 39], fill=RED, width=2)
         # diagonal CUT stamp on the document, clear of the centred text
         stamp(img, 140, 6, "CUT")
-        # small globe, top right (the planet the deal is about)
-        d.ellipse([220, 12, 268, 60], fill=(30, 170, 110), outline=GOLD,
-                  width=2)
-        d.ellipse([232, 22, 244, 34], fill=(79, 163, 122))
-        d.ellipse([248, 40, 260, 52], fill=(79, 163, 122))
+        # a BIG globe + a thermometer, like the top-1 entry (v35: the user
+        # asked for both — the planet the deal is about, and the heat it
+        # measures. The globe is blue ocean + green continents now, much
+        # bigger than the old green disc; the thermometer stands beside it)
+        d.ellipse([204, 6, 266, 68], fill=(30, 120, 200),
+                  outline=(20, 20, 20), width=2)
+        d.ellipse([216, 16, 236, 32], fill=(60, 180, 90))
+        d.ellipse([236, 38, 256, 54], fill=(60, 180, 90))
+        d.ellipse([214, 44, 226, 56], fill=(60, 180, 90))
+        # thermometer: white tube, red fill rising, round bulb, tick marks
+        d.rectangle([274, 8, 284, 58], fill="white", outline=(20, 20, 20))
+        d.rectangle([276, 24, 282, 58], fill=(220, 30, 40))
+        d.ellipse([270, 56, 290, 76], fill=(220, 30, 40),
+                  outline=(20, 20, 20))
+        for ty in (14, 22, 30, 38, 46, 54):
+            d.line([284, ty, 289, ty], fill=(20, 20, 20), width=1)
     elif key == "akvan":
         d.rectangle([0, 0, w, h], fill=(12, 70, 160))
         # (v29: the top-down spiral read as a target. The user's reference
@@ -708,6 +735,20 @@ def art_image(key, w, h):
         # with the vote on it.)
         # navy sea band, waterline at y62
         d.rectangle([0, 62, w, h], fill=NAVY)
+        # (v35: the top-1 entry's Greenland is a big white mountain, so ours
+        # gets two icebergs flanking the document + a small globe, like its
+        # globe under the 109-0 box — our document is the distinctive part,
+        # the mountain + globe are the top-1 language)
+        # big icebergs flanking the document, drawn before it (it sits on top)
+        d.polygon([(0, 80), (18, 28), (36, 80)], fill="white")
+        d.polygon([(18, 28), (36, 80), (28, 80)], fill=(191, 227, 242))
+        d.polygon([(160, 80), (178, 22), (196, 80)], fill="white")
+        d.polygon([(178, 22), (196, 80), (188, 80)], fill=(191, 227, 242))
+        # small globe above the right iceberg, blue + white grid lines
+        d.ellipse([178, 4, 194, 20], fill=(30, 120, 200),
+                  outline=(20, 20, 20), width=1)
+        d.line([186, 4, 186, 20], fill="white", width=1)
+        d.line([178, 12, 194, 12], fill="white", width=1)
         # the pact document, centred, with both flags and the vote on it
         # (v34: the user asked for a BLACK box behind the ARCTIC PACT title,
         # space between the title and the flags, and a RED box behind the
@@ -728,11 +769,10 @@ def art_image(key, w, h):
         # (no APPROVED stamp here: the word is 8 letters, ~59px rotated,
         # and every placement either ran off the edge or sat on the title.
         # The document + flags + 109-0 already say "approved".)
-        # a small iceberg at the bottom-right, clear of the text scrim
-        d.polygon([(160, 70), (190, 70), (175, 52)], fill="white")
-        d.polygon([(175, 52), (190, 70), (182, 70)], fill=(191, 227, 242))
     elif key == "marathon":
-        d.rectangle([0, 0, w, h], fill=(246, 241, 226))
+        # sandy tan track, like the top-1 entry's Marathon (v35: the old
+        # paper-cream bg read as a page, not a track)
+        d.rectangle([0, 0, w, h], fill=(228, 200, 150))
         # (v26: the runner was a stick figure and the ban was a small medal.
         # Now a bigger, mid-stride runner, the Kenyan flag, and the ban
         # spelled out: "3 YEARS" + a BANNED stamp + a slashed medal.)
@@ -755,15 +795,20 @@ def art_image(key, w, h):
         # the ban, spelled out in a red box, text centred in it (v27)
         d.rectangle([70, 4, 126, 20], fill=RED)
         d.text((98, 12), "3 YEARS", font=F_ART2_S, fill="white", anchor="mm")
-        # a bigger runner, mid-stride, shifted down-left so the box is clear;
-        # white bib on the chest
-        d.ellipse([58, 22, 70, 34], fill=(20, 20, 20))
-        d.line([64, 34, 70, 52], fill=(20, 20, 20), width=4)
-        d.line([64, 38, 52, 30], fill=(20, 20, 20), width=3)
-        d.line([64, 38, 76, 46], fill=(20, 20, 20), width=3)
-        d.line([70, 52, 82, 64], fill=(20, 20, 20), width=3)
-        d.line([70, 52, 58, 66], fill=(20, 20, 20), width=3)
-        d.rectangle([61, 40, 67, 46], fill="white")
+        # a proper cartoon runner, like the top-1 entry (v35: the old black
+        # stick figure is gone — now a runner in a RED top, brown skin,
+        # black hair, mid-stride to the right, white bib; our "3 YEARS" box
+        # + Kenyan flag stay as our own character)
+        SKIN = (120, 80, 50)
+        d.ellipse([58, 22, 72, 36], fill=SKIN)
+        d.ellipse([58, 20, 72, 28], fill=(20, 20, 20))
+        d.polygon([(58, 36), (72, 36), (70, 52), (60, 52)], fill=(200, 30, 30))
+        d.rectangle([60, 52, 70, 58], fill=(20, 20, 20))
+        d.line([60, 38, 50, 30], fill=SKIN, width=3)
+        d.line([70, 38, 80, 46], fill=SKIN, width=3)
+        d.line([66, 58, 78, 70], fill=SKIN, width=3)
+        d.line([64, 58, 52, 70], fill=SKIN, width=3)
+        d.rectangle([62, 42, 68, 48], fill="white")
         # (v31: the medal + its red prohibition circle are GONE — the user
         # found the red circle redundant. The BANNED stamp now sits where
         # the medal was, so there is one clear "banned" element.)
