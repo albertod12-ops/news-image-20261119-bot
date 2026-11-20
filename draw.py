@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""news-image-20261119 v20: 36 stories, newspaper front page after the top 1.
+"""news-image-20261119 v21: 36 stories, newspaper front page after the top 1.
 Draws entry.png (1024x1024, deterministic) from world.geo.json only.
 v17 vs v16: user order 2026-11-20 15:58 WIB ("Buat sama seperti sebelumnya,
 tapi jarak antara garis dan text sama, kemudian untuk text di dalam kotak yang
@@ -66,6 +66,27 @@ paper berg + 2 flags on one gold pole; RIYADH red interceptor trail + gold
 burst + city dots; COLOMBIA 3 paper placards; AUSTRALIA 4 navy bars + red
 arrow (gauge removed); MARATHON gold medal + red circle-slash (finish post
 removed).
+v21 vs v20: user order 2026-11-20 16:26 WIB ("tiap gambar dan penjelasan
+dikasih garis kotak-kotak seperti di top 1, jadi semua nya sudah jelas per
+kotak dan ada jarak, dan font mereka lebih bagus juga, lebih presisi"):
+- Every card boxed like top 1 (lb1.png): 1px INK outline around the whole
+  card (art + kicker strip + headline + deck), fixed bottom per row so the
+  boxes align; 8px paper gutters between cards (existing 8px card spacing)
+  + 5-6px gaps between rows. To buy the vertical space: heroes art 96 -> 90
+  and smalls art 84 -> 80, smalls start 380 -> 384, map 712 -> 716 (date
+  check/footer unchanged). Heroes box bottom hy+186 = 378 (6px gap to
+  smalls); smalls box bottom cy+161 (5px gap between rows, 5px to the map).
+  Art/strip/pill shifted with the new heights (v17 centring preserved);
+  summit flags moved up 6px (y28) so the leaders (now 6px higher) keep
+  their 2px gap; RIYADH trail bottom points y80/84 -> y79 (art now 80 tall).
+- Fonts, Times like top 1 + the masthead: headlines NotoSerif-Black ->
+  LiberationSerif-Bold 20/16 (measured ~18% narrower, so 2-line wraps hold
+  with the new 8px text insets); decks NotoSans-Bold -> LiberationSerif
+  regular 12/11. Headline/deck text inset 8px inside the box (wrap width
+  hw-16 / sw_-16); heroes strip contents also 8px in, smalls strip keeps
+  v20's 4px in (measured: "12. CANBERRA · ECONOMY" 130.2px + REPORTED pill
+  51.5px would overlap by ~2px at 8px in). Leading: heroes 22/14, smalls
+  17/13.
 NOTE: the first draw.py run right after an edit can render the pre-edit file
 (sizes matched the previous version in v15/v16/v18) — always verify with 2-3
 runs and take the later sha.
@@ -107,10 +128,10 @@ F_TTEXT = font("NotoSans-Bold.ttf", 10, FNOTO)
 F_KICK = font("NotoSans-Bold.ttf", 10, FNOTO)
 F_PILL = font("NotoSans-Bold.ttf", 8, FNOTO)
 F_SRC = font("NotoSans-Bold.ttf", 9, FNOTO)
-F_HEAD = font("NotoSerif-Black.ttf", 20, FNOTO)
-F_HEAD_S = font("NotoSerif-Black.ttf", 16, FNOTO)
-F_DECK = font("NotoSans-Bold.ttf", 11, FNOTO)
-F_DECK_S = font("NotoSans-Bold.ttf", 10, FNOTO)
+F_HEAD = font("LiberationSerif-Bold.ttf", 20, FLIB)
+F_HEAD_S = font("LiberationSerif-Bold.ttf", 16, FLIB)
+F_DECK = font("LiberationSerif-Regular.ttf", 12, FLIB)
+F_DECK_S = font("LiberationSerif-Regular.ttf", 11, FLIB)
 F_LABEL = font("NotoSans-Bold.ttf", 8, FNOTO)
 F_PIN = font("NotoSans-Bold.ttf", 11, FNOTO)
 F_ART = font("NotoSans-Black.ttf", 24, FNOTO)
@@ -381,9 +402,9 @@ def art_image(key, w, h):
         d.line([w - 35, 17, w - 35, 9], fill=NAVY, width=2)
         d.line([w - 35, 17, w - 30, 13], fill=NAVY, width=2)
         # three flags above the leaders (DeepSeek v20: one flag per leader)
-        _flag(d, 72, 34, 30, 20, "us")
-        _flag(d, 183, 34, 30, 20, "cn")
-        _flag(d, 294, 34, 30, 20, "ru")
+        _flag(d, 72, 28, 30, 20, "us")
+        _flag(d, 183, 28, 30, 20, "cn")
+        _flag(d, 294, 28, 30, 20, "ru")
         # three leaders seated at one round table (below the focal text)
         d.rectangle([w * 0.08, h - 24, w * 0.92, h - 12], fill=(90, 60, 30))
         d.line([w * 0.08, h - 24, w * 0.92, h - 24], fill=GOLD, width=2)
@@ -553,7 +574,7 @@ def art_image(key, w, h):
         d.rectangle([0, 0, w, h], fill=(10, 20, 50))
         _skyline(d, w, h, h - 30, (6, 12, 34), 11)
         # red interceptor trail rising to a gold burst (DeepSeek v20)
-        d.polygon([(20, 80), (60, 44), (120, 20), (124, 24), (64, 48), (24, 84)],
+        d.polygon([(20, 79), (60, 44), (120, 20), (124, 24), (64, 48), (24, 79)],
                   fill=RED)
         d.ellipse([114, 12, 126, 24], fill=GOLD)
         for a in range(0, 360, 45):
@@ -756,67 +777,70 @@ def main():
         d.text((cx + 5, 170), txt, font=F_TTEXT, fill=INK)
     d.line([12, 189, W - 12, 189], fill=RULE, width=1)
 
-    # ---- heroes 192-374: lead 396 wide, rails 294 (hierarchy, not equal thirds) ----
+    # ---- heroes 192-378: lead 396 wide, rails 294; each card boxed like top 1 ----
     hy = 192
     hws = [396, 294, 294]
     for i, (num, reg, topic, src, status, head, deck, big, small, key) in enumerate(FRONT[:3]):
         hw = hws[i]
         cx = 12 + sum(hws[:i]) + 8 * i
-        im = art_image(key, hw, 96)
+        im = art_image(key, hw, 90)
         idd = ImageDraw.Draw(im)
         if key == "summit":
-            focal_text(idd, 0, 0, hw, 96, big, small, F_FOC23, F_FOC23_S, "YELLOW", True)
+            focal_text(idd, 0, 0, hw, 90, big, small, F_FOC23, F_FOC23_S, "YELLOW", True)
         elif key == "gta":
-            focal_text(idd, 0, 0, hw, 96, big, small, F_FOC, F_FOC_S, "WHITE", True)
+            focal_text(idd, 0, 0, hw, 90, big, small, F_FOC, F_FOC_S, "WHITE", True)
         else:
-            art_text(im, idd, 0, 0, hw, 96, big, small, F_LBL, F_LBL_S)
+            art_text(im, idd, 0, 0, hw, 90, big, small, F_LBL, F_LBL_S)
         img.paste(im, (cx, hy))
-        d.rectangle([cx, hy + 96, cx + hw, hy + 112], fill=NAVY)
+        d.rectangle([cx, hy + 90, cx + hw, hy + 106], fill=NAVY)
         pw = d.textlength(status, font=F_PILL) + 10
-        d.rounded_rectangle([cx + 4, hy + 99, cx + 4 + pw, hy + 109],
+        d.rounded_rectangle([cx + 8, hy + 93, cx + 8 + pw, hy + 103],
                             radius=2, fill=PILL_COL[status])
-        d.text((cx + 9, hy + 98), status, font=F_PILL, fill="white")
-        d.text((cx + 10 + pw, hy + 97), "%d. %s \u00b7 %s" % (num, reg, topic),
+        d.text((cx + 13, hy + 92), status, font=F_PILL, fill="white")
+        d.text((cx + 14 + pw, hy + 91), "%d. %s \u00b7 %s" % (num, reg, topic),
                font=F_KICK, fill="white")
         sw = d.textlength(src, font=F_SRC)
-        d.text((cx + hw - 5 - sw, hy + 97), src, font=F_SRC, fill=GOLD)
-        lines = wrap(d, head, F_HEAD, hw - 6, max_lines=2)
+        d.text((cx + hw - 8 - sw, hy + 91), src, font=F_SRC, fill=GOLD)
+        lines = wrap(d, head, F_HEAD, hw - 16, max_lines=2)
         for j, ln in enumerate(lines):
-            d.text((cx + 3, hy + 116 + j * 22), ln, font=F_HEAD, fill=INK)
-        dlines = wrap(d, deck, F_DECK, hw - 6, max_lines=2)
+            d.text((cx + 8, hy + 110 + j * 22), ln, font=F_HEAD, fill=INK)
+        dlines = wrap(d, deck, F_DECK, hw - 16, max_lines=2)
         for j, ln in enumerate(dlines):
-            d.text((cx + 3, hy + 116 + len(lines) * 22 + 2 + j * 13),
+            d.text((cx + 8, hy + 110 + len(lines) * 22 + 2 + j * 14),
                    ln, font=F_DECK, fill=(60, 60, 60))
+        # box around the whole card, like top 1 (1px ink, fixed bottom per row)
+        d.rectangle([cx, hy, cx + hw, hy + 186], outline=INK, width=1)
 
-    # ---- smalls 380-706 (2 rows x 5, image 196x84) ----
+    # ---- smalls 384-711 (2 rows x 5, image 196x80); each card boxed like top 1 ----
     sw_ = 196
     for r in range(2):
         for c in range(5):
             k = 3 + r * 5 + c
             num, reg, topic, src, status, head, deck, big, small, key = FRONT[k]
             cx = 12 + c * (sw_ + 8)
-            cy = 380 + r * 166
-            im = art_image(key, sw_, 84)
+            cy = 384 + r * 166
+            im = art_image(key, sw_, 80)
             idd = ImageDraw.Draw(im)
-            art_text(im, idd, 0, 0, sw_, 84, big, small, F_LBL2, F_LBL2_S)
+            art_text(im, idd, 0, 0, sw_, 80, big, small, F_LBL2, F_LBL2_S)
             img.paste(im, (cx, cy))
-            d.rectangle([cx, cy + 84, cx + sw_, cy + 99], fill=NAVY)
-            d.text((cx + 4, cy + 85), "%d. %s \u00b7 %s" % (num, reg, topic),
+            d.rectangle([cx, cy + 80, cx + sw_, cy + 95], fill=NAVY)
+            d.text((cx + 4, cy + 81), "%d. %s \u00b7 %s" % (num, reg, topic),
                    font=F_KICK, fill="white")
             pw = d.textlength(status, font=F_PILL) + 10
-            d.rounded_rectangle([cx + sw_ - 4 - pw, cy + 86, cx + sw_ - 4, cy + 96],
+            d.rounded_rectangle([cx + sw_ - 4 - pw, cy + 82, cx + sw_ - 4, cy + 92],
                                 radius=2, fill=PILL_COL[status])
-            d.text((cx + sw_ + 1 - pw, cy + 85), status, font=F_PILL, fill="white")
-            lines = wrap(d, head, F_HEAD_S, sw_ - 4, max_lines=2)
+            d.text((cx + sw_ + 1 - pw, cy + 81), status, font=F_PILL, fill="white")
+            lines = wrap(d, head, F_HEAD_S, sw_ - 16, max_lines=2)
             for j, ln in enumerate(lines):
-                d.text((cx + 2, cy + 102 + j * 18), ln, font=F_HEAD_S, fill=INK)
-            dlines = wrap(d, deck + " \u2014 " + src, F_DECK_S, sw_ - 4, max_lines=2)
+                d.text((cx + 8, cy + 99 + j * 17), ln, font=F_HEAD_S, fill=INK)
+            dlines = wrap(d, deck + " \u2014 " + src, F_DECK_S, sw_ - 16, max_lines=2)
             for j, ln in enumerate(dlines):
-                d.text((cx + 2, cy + 102 + len(lines) * 18 + 1 + j * 13),
+                d.text((cx + 8, cy + 99 + len(lines) * 17 + 1 + j * 13),
                        ln, font=F_DECK_S, fill=(60, 60, 60))
+            d.rectangle([cx, cy, cx + sw_, cy + 161], outline=INK, width=1)
 
-    # ---- map + also 712-952 (map taller, also-list roomier) ----
-    my = 712
+    # ---- map + also 716-956 (map taller, also-list roomier) ----
+    my = 716
     d.text((12, my), "WHERE IT HAPPENED", font=F_SEC, fill=INK)
     d.line([12, my + 16, 348, my + 16], fill=INK, width=1)
     d.rectangle([12, my + 22, 348, my + 172], fill=OCEAN, outline=RULE, width=1)
