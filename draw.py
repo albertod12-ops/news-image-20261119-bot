@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""news-image-20261119 v15: 36 stories, newspaper front page after the top 1.
+"""news-image-20261119 v16: 36 stories, newspaper front page after the top 1.
 Draws entry.png (1024x1024, deterministic) from world.geo.json only.
-v15 vs v14: user order 2026-11-20 15:49 WIB ("Coba buat garis diatas Thursday
-seperti top 1 itu") — a thin ink rule above the masthead date, like
-hazel-harbor-63's: 1px line at y 17 from x=98 to 1012, between the kicker row
-and the title (kicker ink ends ~y 13, title glyphs start y 20). It starts at
-x=98, not 12, so it does not cut through the red date box. No band shifts.
+v16 vs v15: user order 2026-11-20 15:53 WIB ("Perkecil lagi Thursday nya,
+tapi lebar masih sama, berikan jarak antara garis dan text di atas bawah") —
+Thursday font 68px -> 60px LiberationSerif-Bold (Times, same face as top 1),
+but letter-spaced (tracking ~3.94px/gap, new draw_tracked helper) so it still
+spans exactly the same 839px width. The rule above the title gets breathing
+room: line y 17 -> 19 (6px below the kicker), title drawn at y 14 (glyphs
+26..81, 7px below the line). Deck y 83 and gold rule 103 unchanged — no band
+shifts.
 Run: python3 draw.py  -> writes entry.png in this directory."""
 import json
 import math
@@ -34,7 +37,18 @@ def font(name, size, base=FD):
     return ImageFont.truetype(os.path.join(base, name), size)
 
 
-F_TITLE = font("LiberationSerif-Bold.ttf", 68, FLIB)
+def draw_tracked(d, x, y, text, fnt, fill, target_w):
+    """Draw text letter-spaced so it spans exactly target_w."""
+    nat = sum(d.textlength(ch, font=fnt) for ch in text)
+    gaps = max(len(text) - 1, 1)
+    track = (target_w - nat) / gaps
+    cx = x
+    for ch in text:
+        d.text((cx, y), ch, font=fnt, fill=fill)
+        cx += d.textlength(ch, font=fnt) + track
+
+
+F_TITLE = font("LiberationSerif-Bold.ttf", 60, FLIB)
 F_EYE = font("NotoSans-Black.ttf", 13, FNOTO)
 F_DECKLINE = font("NotoSerif-Italic.ttf", 16, FNOTO)
 F_DATE = font("NotoSans-Black.ttf", 30, FNOTO)
@@ -632,8 +646,8 @@ def main():
     d.text((49, 26), "19", font=F_DATE, fill="white", anchor="ma")
     d.text((49, 60), "THU \u00b7 2026", font=F_DATE2, fill="white", anchor="ma")
     d.text((98, 3), "THE WORLD IN ONE DAY", font=F_EYE, fill=RED)
-    d.line([98, 17, 1012, 17], fill=INK, width=1)
-    d.text((98, 6), "Thursday 19 November 2026", font=F_TITLE, fill=INK)
+    d.line([98, 19, 1012, 19], fill=INK, width=1)
+    draw_tracked(d, 98, 14, "Thursday 19 November 2026", F_TITLE, INK, 839)
     d.text((98, 83), "Trump, Xi and Putin share one table \u00b7 World Court finds "
            "Myanmar guilty of genocide \u00b7 COP31's draft drops fossil fuels",
            font=F_DECKLINE, fill=RED)
