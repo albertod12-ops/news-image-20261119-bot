@@ -393,6 +393,27 @@ def _flag(d, x, y, w, h, kind):
         d.rectangle([x, y + 2 * h / 3, x + w, y + h], fill=(200, 20, 30))
 
 
+def stamp(img, x, y, text, angle=-15):
+    """Diagonal red rubber-stamp label (the #1 entry's signature device).
+
+    Draws `text` in red bold caps inside a red outline box on a small
+    RGBA tile, rotates it, and pastes it onto `img` at (x, y).
+    """
+    tmp = Image.new("RGBA", (1, 1))
+    td = ImageDraw.Draw(tmp)
+    bbox = td.textbbox((0, 0), text, font=F_SRC)
+    tw = bbox[2] - bbox[0]
+    th = bbox[3] - bbox[1]
+    pad = 4
+    sw, sh = tw + pad * 2 + 4, th + pad * 2 + 4
+    s = Image.new("RGBA", (sw, sh), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(s)
+    sd.rectangle([2, 2, sw - 3, sh - 3], outline=(200, 16, 46, 255), width=2)
+    sd.text((pad + 2, pad + 2), text, font=F_SRC, fill=(200, 16, 46, 255))
+    s = s.rotate(angle, expand=True, resample=Image.BICUBIC)
+    img.paste(s, (x, y), s)
+
+
 def art_image(key, w, h):
     """Flat-vector picture for one front story, drawn in code."""
     img = Image.new("RGB", (w, h), PAPER)
@@ -409,18 +430,32 @@ def art_image(key, w, h):
         # warm glow behind the table so the leaders pop out of the dark
         d.ellipse([w * 0.22, 52, w * 0.78, 92], fill=(26, 52, 87))
         d.ellipse([w * 0.30, 58, w * 0.70, 88], fill=(36, 68, 110))
-        # three flags above the leaders (DeepSeek v20: one flag per leader)
-        _flag(d, 72, 28, 30, 20, "us")
-        _flag(d, 183, 28, 30, 20, "cn")
-        _flag(d, 294, 28, 30, 20, "ru")
+        # three flags behind the leaders (one flag per leader, like top 1)
+        _flag(d, 72, 40, 30, 20, "us")
+        _flag(d, 183, 40, 30, 20, "cn")
+        _flag(d, 294, 40, 30, 20, "ru")
         # three leaders seated at one round table (below the focal text)
         d.rectangle([w * 0.08, h - 24, w * 0.92, h - 12], fill=(90, 60, 30))
         d.line([w * 0.08, h - 24, w * 0.92, h - 24], fill=GOLD, width=2)
         for i in range(3):
             cx = int(w * (0.22 + i * 0.28))
-            d.ellipse([cx - 9, h - 42, cx + 9, h - 24], fill=(230, 200, 160))
+            # suit body
             d.polygon([(cx - 13, h - 24), (cx + 13, h - 24), (cx + 8, h - 40),
-                       (cx - 8, h - 40)], fill=(20, 20, 20) if i != 1 else (180, 30, 30))
+                       (cx - 8, h - 40)],
+                      fill=(20, 20, 20) if i != 1 else (180, 30, 30))
+            # tie on the chest: Trump crimson, Xi navy, Putin slate
+            tie_col = ((200, 16, 46) if i == 0 else
+                       ((30, 50, 120) if i == 1 else (100, 120, 140)))
+            d.polygon([(cx - 2, 60), (cx + 2, 60), (cx, 66)], fill=tie_col)
+            # head, drawn after the body so it sits on top (was hidden before)
+            d.ellipse([cx - 9, 42, cx + 9, 60], fill=(230, 200, 160))
+            # hair: Trump gold quiff, Xi black side-part, Putin grey buzz
+            if i == 0:
+                d.ellipse([cx - 9, 40, cx + 9, 48], fill=(232, 190, 60))
+            elif i == 1:
+                d.ellipse([cx - 9, 40, cx + 1, 48], fill=(20, 20, 20))
+            else:
+                d.ellipse([cx - 9, 40, cx + 9, 47], fill=(150, 150, 150))
         # nameplates on the table front, gold like the top-1 entry (DeepSeek v20)
         for i, name in enumerate(("TRUMP", "XI", "PUTIN")):
             cx = int(w * (0.22 + i * 0.28))
@@ -433,6 +468,9 @@ def art_image(key, w, h):
                                        int(140 - 60 * t)))
         # sun, right: half-disc clipped by the edge (a sunset, not a logo)
         d.ellipse([182, 28, 210, 56], fill=(255, 190, 60))
+        # palm fronds silhouetted across the sun
+        for py in (34, 41, 48):
+            d.line([184, py, 196, py], fill=(40, 20, 60), width=1)
         _skyline(d, w, h, h, (10, 5, 20), 11)
         for px in (14, w - 22):
             d.line([px, h - 30, px + 4, h - 62], fill=(10, 30, 10), width=3)
@@ -440,16 +478,22 @@ def art_image(key, w, h):
                 d.line([px + 2, h - 60, px + 2 + int(22 * math.sin(math.radians(a))),
                         h - 60 - int(14 * abs(math.cos(math.radians(a))))],
                        fill=(10, 30, 10), width=2)
-        # NZ midnight: gold clock top left, PS5 box, queue of 4
+        # NZ midnight: gold clock top left, PS5 box, 2 fans with hair (not 4 dots)
         d.ellipse([8, 8, 28, 28], fill=GOLD)
         d.line([18, 18, 18, 10], fill=NAVY, width=2)
         d.line([18, 18, 23, 14], fill=NAVY, width=2)
         d.rectangle([173, 58, 195, 72], fill=(10, 10, 30), outline="white", width=1)
         d.text((184, 65), "PS5", font=F_SRC, fill="white", anchor="mm")
-        for i in range(4):
-            cx = 110 + i * 18
-            d.ellipse([cx - 5, h - 16, cx + 5, h - 6], fill=(230, 200, 160))
-            d.rectangle([cx - 7, h - 6, cx + 7, h], fill=(20, 20, 40))
+        # fan 1: buzz cut (dark cap on the head)
+        cx = 118
+        d.ellipse([cx - 5, 62, cx + 5, 72], fill=(230, 200, 160))
+        d.ellipse([cx - 5, 60, cx + 5, 66], fill=(40, 30, 20))
+        d.rectangle([cx - 7, 72, cx + 7, 80], fill=(20, 20, 40))
+        # fan 2: long hair (dark shape behind the head, visible at the sides)
+        cx = 146
+        d.ellipse([cx - 6, 60, cx + 6, 76], fill=(40, 30, 20))
+        d.ellipse([cx - 5, 62, cx + 5, 72], fill=(230, 200, 160))
+        d.rectangle([cx - 7, 72, cx + 7, 80], fill=(20, 20, 40))
     elif key == "anthropic":
         d.rectangle([0, 0, w, h], fill=(246, 242, 233))
         for gy in range(0, h, 14):
@@ -460,6 +504,12 @@ def art_image(key, w, h):
         for i in range(len(steps) - 1):
             d.line([steps[i], steps[i + 1]], fill=GOLD, width=3)
         d.polygon([(168, 26), (184, 18), (168, 10)], fill=RED)
+        # cartoon CEO on the top step, one arm raised at the arrowhead
+        d.ellipse([150, 12, 158, 20], fill=(230, 200, 160))
+        d.ellipse([150, 11, 158, 16], fill=(40, 30, 20))
+        d.rectangle([149, 20, 159, 24], fill=NAVY)
+        d.polygon([(153, 20), (155, 20), (154, 24)], fill=RED)
+        d.line([158, 21, 164, 14], fill=(230, 200, 160), width=2)
         # navy ticker strip along the bottom right (clear of the text scrim)
         d.rectangle([100, h - 8, w, h], fill=NAVY)
         for tx in (108, 124, 140, 156, 172):
@@ -480,13 +530,19 @@ def art_image(key, w, h):
         d.rectangle([104, 80, 288, 84], fill=(240, 234, 220))
         d.rectangle([98, 84, 292, 90], fill=(240, 234, 220))
         # red divider between the 9 paper and 6 ink columns (the 9-6 vote)
-        d.line([213, 40, 213, 74], fill=(179, 34, 44), width=2)
+        d.line([213, 40, 213, 74], fill=(179, 34, 44), width=3)
         # Myanmar flag top left (yellow/green/red + white star), white outline
         d.rectangle([12, 8, 38, 13], fill=(254, 203, 0))
         d.rectangle([12, 13, 38, 18], fill=(0, 140, 60))
         d.rectangle([12, 18, 38, 24], fill=(220, 40, 40))
         d.rectangle([12, 8, 38, 24], outline="white", width=1)
         _star(d, 25, 16, 5, 2)
+        # gold scales of justice, left, below the flag (the recognisable object)
+        d.line([60, 34, 60, 58], fill=GOLD, width=2)
+        d.line([44, 38, 76, 38], fill=GOLD, width=2)
+        d.polygon([(48, 38), (56, 38), (52, 48)], fill=GOLD)
+        d.polygon([(64, 38), (72, 38), (68, 48)], fill=GOLD)
+        d.ellipse([56, 58, 64, 64], fill=GOLD)
     elif key == "cop31":
         d.rectangle([0, 0, w, h], fill=(11, 110, 110))
         # yellow hourglass, left: two gold-framed triangles + sand stream + pile
@@ -500,6 +556,8 @@ def art_image(key, w, h):
         d.line([40, 20, 56, 20], fill=(192, 57, 43), width=2)
         for gy in (50, 56, 62):
             d.ellipse([46, gy, 50, gy + 3], fill=(247, 222, 154))
+        # glass highlight on the hourglass left edge
+        d.line([26, 12, 44, 42], fill=(255, 255, 255), width=1)
         # green globe, right: gold outline + meridian/latitude lines + continents
         d.ellipse([198, 16, 268, 86], fill=(30, 170, 110), outline=GOLD, width=2)
         d.line([233, 18, 233, 84], fill=GOLD, width=1)
@@ -534,6 +592,12 @@ def art_image(key, w, h):
         d.polygon([(179, 4), (189, 24), (169, 24)], fill=RED,
                   outline=(20, 20, 20))
         d.text((179, 14), "!", font=F_ART2_S, fill=YELLOW, anchor="mm")
+        # coastline + a tiny boat under the spiral, bottom-right (clear of scrim)
+        d.polygon([(120, 80), (120, 70), (140, 66), (160, 70), (180, 66),
+                   (196, 70), (196, 80)], fill=(8, 40, 90))
+        d.polygon([(146, 62), (158, 62), (152, 66)], fill="white")
+        d.line([152, 62, 152, 54], fill="white", width=1)
+        d.line([142, 66, 162, 66], fill=(200, 220, 240), width=1)
     elif key == "kerch":
         d.rectangle([0, 0, w, h], fill=(14, 30, 80))
         # bridge arc + gold deck with a bevelled gap mid-span, red span sagging
@@ -546,19 +610,33 @@ def art_image(key, w, h):
             d.line([px, h - 40, px, h - 52], fill=(150, 150, 150), width=2)
         d.polygon([(100, h - 40), (130, h - 40), (122, h - 28), (108, h - 28)],
                   fill=(200, 40, 40))
-        # halted train, three smoke ellipses rising on a diagonal, fading up
-        d.rectangle([w - 66, h - 34, w - 14, h - 22], fill=(200, 40, 40))
-        d.ellipse([100, 16, 112, 26], fill=(200, 200, 200))
-        d.ellipse([110, 8, 124, 20], fill=(220, 220, 220))
-        d.ellipse([120, 0, 134, 12], fill=(235, 235, 235))
+        # halted train: 3 cars (loco + 2 wagons) with a gold headlight,
+        # and a small figure standing on the deck by the gap (human scale)
+        d.rectangle([130, 48, 148, 58], fill=(180, 30, 30))
+        d.rectangle([150, 46, 166, 58], fill=(200, 40, 40))
+        d.rectangle([168, 48, 182, 58], fill=(180, 30, 30))
+        d.ellipse([162, 51, 166, 55], fill=GOLD)
+        d.ellipse([120, 36, 124, 40], fill=(230, 200, 160))
+        d.line([122, 40, 122, 46], fill=(20, 20, 20), width=2)
+        # four smoke puffs rising on a diagonal from the gap, fading up
+        d.ellipse([96, 20, 108, 30], fill=(200, 200, 200))
+        d.ellipse([106, 12, 120, 24], fill=(220, 220, 220))
+        d.ellipse([116, 4, 130, 16], fill=(235, 235, 235))
+        d.ellipse([126, 0, 140, 10], fill=(245, 245, 245))
     elif key == "han":
         d.rectangle([0, 0, w, h], fill=NAVY)
-        # struck-through 15 top left (the overturned sentence): thick bar
+        # struck-through 15 top left (the overturned sentence): shadowed numerals
+        # + a 5px stamp stroke that overshoots them
+        d.text((16, 12), "15", font=F_ART2, fill=(11, 27, 51))
         d.text((14, 10), "15", font=F_ART2, fill="white")
-        d.line([10, 27, 34, 7], fill=RED, width=4)
-        # gold gavel angled top right (DeepSeek v20), head kept small
-        d.line([w - 44, 12, w - 16, 26], fill=GOLD, width=5)
-        d.rectangle([w - 48, 9, w - 38, 19], fill=(200, 160, 40))
+        d.line([10, 27, 34, 7], fill=RED, width=5)
+        # diagonal OVERTURNED rubber stamp, top centre (the #1 entry's device)
+        stamp(img, 60, 6, "OVERTURNED")
+        # gold gavel as a real prop, top right: head + handle + striking block
+        d.rectangle([146, 22, 165, 27], fill=(91, 58, 30))
+        d.line([146, 22, 165, 22], fill=(138, 97, 54), width=1)
+        d.rectangle([150, 8, 165, 15], fill=GOLD)
+        d.line([158, 15, 150, 22], fill=GOLD, width=3)
         # gold scales on a paper beam, centre right
         d.line([140, 24, 140, 42], fill="white", width=2)
         d.line([110, 42, 170, 42], fill="white", width=2)
@@ -572,8 +650,12 @@ def art_image(key, w, h):
         d.polygon([(8, 64), (40, 64), (24, 26)], fill="white")
         # light-blue facet wedge on the iceberg's right third
         d.polygon([(24, 26), (40, 64), (32, 64)], fill=(191, 227, 242))
+        # distant floe, smaller and paler (depth plane behind the main berg)
+        d.polygon([(64, 64), (88, 64), (76, 48)], fill=(180, 210, 230))
         d.polygon([(w * 0.55, 64), (w * 0.72, 52), (w * 0.9, 64)],
                   fill=(230, 240, 245))
+        # diagonal APPROVED rubber stamp, upper sky (the #1 entry's device)
+        stamp(img, 52, 6, "APPROVED")
         # two flags stacked on one gold pole, right
         d.line([148, 14, 148, 52], fill=GOLD, width=2)
         d.rectangle([148, 14, 164, 24], fill=(200, 20, 40))
@@ -593,6 +675,10 @@ def art_image(key, w, h):
         d.line([cx, cy + 2, cx + 12, cy + 8], fill=(20, 20, 20), width=3)
         d.line([cx + 4, cy + 12, cx - 6, cy + 22], fill=(20, 20, 20), width=3)
         d.line([cx + 4, cy + 12, cx + 14, cy + 20], fill=(20, 20, 20), width=3)
+        # white race bib on the runner's chest
+        d.rectangle([85, 29, 91, 35], fill="white")
+        # diagonal BANNED rubber stamp above the medal (the #1 entry's device)
+        stamp(img, 118, 4, "BANNED")
         # gold medal with a red circle-slash that fits the medal (the ban)
         d.ellipse([128, 18, 152, 42], fill=GOLD)
         d.ellipse([128, 18, 152, 42], outline=RED, width=3)
@@ -600,9 +686,12 @@ def art_image(key, w, h):
     elif key == "riyadh":
         d.rectangle([0, 0, w, h], fill=(10, 20, 50))
         _skyline(d, w, h, h - 30, (6, 12, 34), 11)
-        # red interceptor trail rising to a gold burst, upper right
-        d.polygon([(20, 79), (70, 50), (148, 16), (152, 20), (74, 54),
-                   (24, 79)], fill=RED)
+        # red interceptor trail rising to a gold burst, upper right:
+        # a wedge, thick at launch and needle-thin at the burst
+        d.polygon([(18, 79), (70, 50), (149, 17), (151, 19), (74, 54),
+                   (26, 79)], fill=RED)
+        # soft red glow behind the gold burst so it sits in the sky
+        d.ellipse([138, 4, 162, 28], fill=(120, 20, 20))
         d.ellipse([144, 10, 156, 22], fill=GOLD)
         for a in range(0, 360, 45):
             d.line([150, 16, 150 + int(12 * math.cos(math.radians(a))),
@@ -670,15 +759,21 @@ def art_image(key, w, h):
         d.line([w - 74, 18, w - 26, 18], fill=RED, width=2)
     elif key == "colombia":
         d.rectangle([0, 0, w, h], fill=(240, 220, 160))
+        # crowd of 7 with faces (dot eyes + mouth on each head)
         for i in range(7):
             x = 10 + i * (w // 7)
             d.ellipse([x, h - 44, x + 16, h - 28], fill=(200, 140, 90))
+            d.ellipse([x + 5, h - 38, x + 7, h - 36], fill=(20, 20, 20))
+            d.ellipse([x + 9, h - 38, x + 11, h - 36], fill=(20, 20, 20))
+            d.line([x + 6, h - 33, x + 10, h - 33], fill=(20, 20, 20),
+                   width=1)
             d.rectangle([x + 2, h - 28, x + 14, h - 8], fill=(40, 90, 160))
-        d.rectangle([w // 2 - 34, 8, w // 2 + 34, 30], fill="white",
-                    outline=RED, width=2)
+        # PARO banner as cloth, tilted +3 deg (white + red outline)
+        d.polygon([(w // 2 - 34, 10), (w // 2 + 34, 8), (w // 2 + 34, 28),
+                   (w // 2 - 34, 30)], fill="white", outline=RED, width=2)
         d.text((w // 2, 19), "PARO", font=F_ART2_S, fill=RED, anchor="mm")
-        # second union banner top left + torn tax-bill page top right
-        d.rectangle([8, 8, 62, 26], fill=NAVY)
+        # FECODE banner as cloth, tilted -4 deg (navy) + torn tax-bill page
+        d.polygon([(8, 10), (62, 8), (62, 26), (8, 28)], fill=NAVY)
         d.text((35, 17), "FECODE", font=F_SRC, fill="white", anchor="mm")
         d.polygon([(w - 40, 8), (w - 12, 8), (w - 16, 24),
                    (w - 26, 16), (w - 34, 24)], fill="white",
@@ -700,8 +795,11 @@ def art_image(key, w, h):
         # red arrow climbing above the bars
         d.line([(20, 56), (164, 20)], fill=RED, width=3)
         d.polygon([(164, 20), (148, 18), (160, 32)], fill=RED)
-        # -44,000 ledger line (kept: the other key number)
-        d.text((12, 8), "-44,000", font=F_SRC, fill=RED)
+        # tallest bar carries a small dark-red cap tick so the eye lands on it
+        d.rectangle([144, 20, 160, 22], fill=(140, 10, 30))
+        # -44,000 in a bold red box, white numerals (the key number, like top 1)
+        d.rectangle([8, 4, 52, 18], fill=RED)
+        d.text((30, 11), "-44,000", font=F_SRC, fill="white", anchor="mm")
     elif key == "libya":
         d.rectangle([0, 0, w, h], fill=(30, 30, 40))
         for i in range(5):
