@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""news-image-20261119 v19: 36 stories, newspaper front page after the top 1.
+"""news-image-20261119 v20: 36 stories, newspaper front page after the top 1.
 Draws entry.png (1024x1024, deterministic) from world.geo.json only.
 v17 vs v16: user order 2026-11-20 15:58 WIB ("Buat sama seperti sebelumnya,
 tapi jarak antara garis dan text sama, kemudian untuk text di dalam kotak yang
@@ -41,6 +41,31 @@ naturally. draw_tracked helper removed. 68px glyphs are 61px tall (vs 55),
 so the deck moves 83 -> 84 (glyphs 89..106, 3px below the title) and the
 gold rule 108 -> 109; every band below shifts +1 (stats 111, timeline 155,
 heroes 192, smalls 380, map 712, date check 964, footer 998, ending ~1021).
+v20 vs v19: user order 2026-11-20 16:10 WIB — (a) numbering 1-36 gets a
+period ("1. SHENZHEN", "14. Gaza"): heroes/smalls kicker format "%d. %s" and
+also-list "%d." (measured: "36." is 15.7px in F_ALSO_N, text at x+20 still
+clears it by 4px; longest kicker "9. COPENHAGEN · SECURITY" is 136px, 8px
+clear of the source). Map pins 1-13 stay bare numbers inside their circles.
+(b) art upgrade via 100milionseek (DeepSeek deepseek-v4.1-flash-free,
+~/workspace/makefun/news-image-20261119-scratch/v20/ask_ds.py): 4 calls —
+heroes (2500 tok, truncated after ICJ), COP31+smalls (truncated after COP31),
+smalls 4-8 and 9-13 (both complete). Lessons: first call timed out at 120s
+(long prompt) — shorten the prompt + raise timeout to 180s; jev-1.13-free
+returns HTTP 400 (do not use); the reasoning model returns empty content when
+the cap is spent on reasoning — ask_ds.py recovers reasoning_content, and
+short prompts + max_tokens 1500-2500 answer directly. Implemented, scene
+only (in-art big/small text still via art_text/focal_text overlays):
+summit +3 flags + gold nameplates + gold table edge; ICJ 15 columns 9 paper
++ 6 ink = the 9-6 vote + Myanmar flag + star; COP31 hourglass left + globe
+right + thermometer; GTA sun right + gold clock top-left + PS5 box + queue
+right; ANTHROPIC paper + navy grid + gold stair-step + red arrowhead + navy
+ticker strip; AKVAN spiral left + ink eye + red warning triangle; KERCH gold
+deck with gap + red sagging span + 3 smoke ellipses; HAN navy + gold gavel +
+yellow scales (courthouse removed, same motif as ICJ); GREENLAND navy sea +
+paper berg + 2 flags on one gold pole; RIYADH red interceptor trail + gold
+burst + city dots; COLOMBIA 3 paper placards; AUSTRALIA 4 navy bars + red
+arrow (gauge removed); MARATHON gold medal + red circle-slash (finish post
+removed).
 NOTE: the first draw.py run right after an edit can render the pre-edit file
 (sizes matched the previous version in v15/v16/v18) — always verify with 2-3
 runs and take the later sha.
@@ -298,6 +323,16 @@ def focal_text(d, x, y, w, h, big, small, f_big, f_small, color, center):
                    fill=small_col, stroke_width=stroke, stroke_fill=(0, 0, 0))
 
 
+def _star(d, cx, cy, r_out, r_in, fill="white"):
+    """Small 5-point star centred at (cx, cy)."""
+    pts = []
+    for k in range(10):
+        r = r_out if k % 2 == 0 else r_in
+        a = math.radians(-90 + k * 36)
+        pts.append((cx + r * math.cos(a), cy + r * math.sin(a)))
+    d.polygon(pts, fill=fill)
+
+
 def _skyline(d, w, h, base, col, seed):
     import random
     rnd = random.Random(seed)
@@ -345,25 +380,30 @@ def art_image(key, w, h):
         d.ellipse([w - 46, 6, w - 24, 28], fill="white")
         d.line([w - 35, 17, w - 35, 9], fill=NAVY, width=2)
         d.line([w - 35, 17, w - 30, 13], fill=NAVY, width=2)
+        # three flags above the leaders (DeepSeek v20: one flag per leader)
+        _flag(d, 72, 34, 30, 20, "us")
+        _flag(d, 183, 34, 30, 20, "cn")
+        _flag(d, 294, 34, 30, 20, "ru")
         # three leaders seated at one round table (below the focal text)
         d.rectangle([w * 0.08, h - 24, w * 0.92, h - 12], fill=(90, 60, 30))
+        d.line([w * 0.08, h - 24, w * 0.92, h - 24], fill=GOLD, width=2)
         for i in range(3):
             cx = int(w * (0.22 + i * 0.28))
             d.ellipse([cx - 9, h - 42, cx + 9, h - 24], fill=(230, 200, 160))
             d.polygon([(cx - 13, h - 24), (cx + 13, h - 24), (cx + 8, h - 40),
                        (cx - 8, h - 40)], fill=(20, 20, 20) if i != 1 else (180, 30, 30))
-        # nameplates on the table front, like the top-1 entry
+        # nameplates on the table front, gold like the top-1 entry (DeepSeek v20)
         for i, name in enumerate(("TRUMP", "XI", "PUTIN")):
             cx = int(w * (0.22 + i * 0.28))
-            d.rectangle([cx - 17, h - 23, cx + 17, h - 13], fill="white")
+            d.rectangle([cx - 17, h - 23, cx + 17, h - 13], fill=GOLD)
             d.text((cx, h - 22), name, font=F_LABEL, fill=INK, anchor="ma")
     elif key == "gta":
         for i in range(h):
             t = i / h
             d.line([0, i, w, i], fill=(int(88 + 120 * t), int(40 + 60 * t),
                                        int(140 - 60 * t)))
-        d.ellipse([w // 2 - 26, h // 2 - 34, w // 2 + 26, h // 2 + 18],
-                  fill=(255, 190, 60))
+        # sun, right (DeepSeek v20)
+        d.ellipse([136, 28, 164, 56], fill=(255, 190, 60))
         _skyline(d, w, h, h, (20, 8, 40), 11)
         for px in (14, w - 22):
             d.line([px, h - 30, px + 4, h - 62], fill=(10, 30, 10), width=3)
@@ -371,116 +411,127 @@ def art_image(key, w, h):
                 d.line([px + 2, h - 60, px + 2 + int(22 * math.sin(math.radians(a))),
                         h - 60 - int(14 * abs(math.cos(math.radians(a))))],
                        fill=(10, 30, 10), width=2)
-        # NZ midnight: clock striking 12 top right, queue outside a shop, PS5 box
-        d.ellipse([w - 40, 6, w - 14, 32], fill="white")
-        d.line([w - 27, 19, w - 27, 10], fill=NAVY, width=2)
-        d.line([w - 27, 19, w - 22, 15], fill=NAVY, width=2)
-        d.rectangle([w - 52, h - 26, w - 12, h - 8], fill=(10, 10, 30),
-                    outline="white", width=1)
-        d.text((w - 32, h - 17), "PS5", font=F_SRC, fill="white", anchor="mm")
+        # NZ midnight: gold clock top left, PS5 box, queue of 4
+        d.ellipse([8, 8, 28, 28], fill=GOLD)
+        d.line([18, 18, 18, 10], fill=NAVY, width=2)
+        d.line([18, 18, 23, 14], fill=NAVY, width=2)
+        d.rectangle([60, 58, 82, 72], fill=(10, 10, 30), outline="white", width=1)
+        d.text((71, 65), "PS5", font=F_SRC, fill="white", anchor="mm")
         for i in range(4):
-            cx = 30 + i * 18
+            cx = 110 + i * 18
             d.ellipse([cx - 5, h - 16, cx + 5, h - 6], fill=(230, 200, 160))
             d.rectangle([cx - 7, h - 6, cx + 7, h], fill=(20, 20, 40))
     elif key == "anthropic":
-        d.rectangle([0, 0, w, h], fill=(8, 70, 52))
-        for gy in range(0, h, 16):
-            d.line([0, gy, w, gy], fill=(24, 100, 74), width=1)
-        pts = [(8, h - 18), (w * 0.25, h - 34), (w * 0.45, h - 26),
-               (w * 0.65, h - 48), (w * 0.85, h - 58), (w - 8, h - 66)]
-        for i in range(len(pts) - 1):
-            d.line([pts[i], pts[i + 1]], fill=(255, 210, 31), width=3)
-        for i, (cx, cy) in enumerate(pts[1:-1]):
-            col = (60, 220, 120) if i % 2 == 0 else (230, 70, 60)
-            d.rectangle([cx - 3, cy - 8, cx + 3, cy + 8], fill=col)
-        # Nasdaq tower with ANT screen + opening bell
-        d.rectangle([w - 40, 6, w - 8, h - 40], fill=(10, 20, 40),
-                    outline=(255, 210, 31), width=1)
-        d.text((w - 24, 16), "ANT", font=F_SRC, fill=(255, 210, 31), anchor="ma")
-        d.text((w - 24, 30), "$83", font=F_SRC, fill="white", anchor="ma")
-        d.arc([12, 6, 40, 30], 180, 360, fill=GOLD, width=3)
-        d.ellipse([24, 30, 28, 36], fill=GOLD)
+        d.rectangle([0, 0, w, h], fill=PAPER)
+        for gy in range(0, h, 14):
+            d.line([0, gy, w, gy], fill=NAVY, width=1)
+        # gold stair-step chart climbing to a red arrowhead (DeepSeek v20)
+        steps = [(8, 66), (48, 66), (48, 52), (88, 52), (88, 38),
+                 (128, 38), (128, 24), (168, 24)]
+        for i in range(len(steps) - 1):
+            d.line([steps[i], steps[i + 1]], fill=GOLD, width=3)
+        d.polygon([(168, 24), (180, 18), (168, 12)], fill=RED)
+        # navy ticker strip along the bottom right (clear of the text scrim)
+        d.rectangle([100, h - 8, w, h], fill=NAVY)
+        for tx in (108, 124, 140, 156, 172):
+            d.line([tx, h - 6, tx + 8, h - 6], fill=GOLD, width=2)
     elif key == "icj":
         d.rectangle([0, 0, w, h], fill=(226, 218, 196))
-        d.polygon([(w * 0.2, 26), (w * 0.8, 26), (w * 0.5, 8)], fill=(120, 110, 95))
-        for i in range(4):
-            cx = int(w * (0.22 + i * 0.19))
-            d.rectangle([cx, 28, cx + 10, h - 12], fill=(240, 234, 220),
-                        outline=(120, 110, 95))
-        d.rectangle([0, h - 12, w, h], fill=(120, 110, 95))
-        # nameplates Gambia v Myanmar (footprints dropped: scrim covers the bottom)
-        d.rectangle([8, 34, 52, 46], fill=NAVY)
-        d.text((30, 40), "GAMBIA", font=F_SRC, fill="white", anchor="mm")
-        d.rectangle([w - 60, 34, w - 8, 46], fill=NAVY)
-        d.text((w - 34, 40), "MYANMAR", font=F_SRC, fill="white", anchor="mm")
+        # pediment + 15 columns: first 9 paper, last 6 ink = the 9-6 vote (DeepSeek v20)
+        d.polygon([(104, 36), (198, 12), (292, 36)], fill=(120, 110, 95))
+        for i in range(15):
+            cx = 116 + i * 11
+            if i < 9:
+                d.rectangle([cx, 40, cx + 7, 74], fill=(244, 239, 226),
+                            outline=(120, 110, 95))
+            else:
+                d.rectangle([cx, 40, cx + 7, 74], fill=NAVY, outline="white")
+        # steps
+        d.rectangle([110, 76, 282, 80], fill=(240, 234, 220))
+        d.rectangle([104, 80, 288, 84], fill=(240, 234, 220))
+        d.rectangle([98, 84, 292, 90], fill=(240, 234, 220))
+        # Myanmar flag top left (yellow/green/red + white star)
+        d.rectangle([12, 8, 38, 13], fill=(254, 203, 0))
+        d.rectangle([12, 13, 38, 18], fill=(0, 140, 60))
+        d.rectangle([12, 18, 38, 24], fill=(220, 40, 40))
+        _star(d, 25, 16, 5, 2)
     elif key == "cop31":
-        d.rectangle([0, 0, w, h], fill=(16, 100, 180))
-        d.ellipse([w // 2 - 26, 8, w // 2 + 26, 60], fill=(30, 170, 110))
-        d.ellipse([w // 2 - 18, 16, w // 2 - 2, 30], fill=(30, 110, 200))
-        d.ellipse([w // 2 + 4, 34, w // 2 + 20, 52], fill=(30, 110, 200))
-        d.rectangle([w - 26, 14, w - 18, h - 14], fill="white")
-        d.rectangle([w - 26, h - 30, w - 18, h - 14], fill=(220, 40, 40))
-        d.ellipse([w - 30, h - 22, w - 14, h - 6], fill=(220, 40, 40))
-        # 48-hour hourglass top left + draft page stamped 2035 top right
-        d.polygon([(14, 8), (34, 8), (24, 22), (14, 36), (34, 36), (24, 22)],
-                  fill=(255, 210, 31))
-        d.rectangle([w - 78, 8, w - 34, 22], fill="white")
-        d.text((w - 56, 15), "2035", font=F_SRC, fill=NAVY, anchor="mm")
+        d.rectangle([0, 0, w, h], fill=(11, 110, 110))
+        # yellow hourglass, left: two gold-framed triangles + sand stream + pile
+        d.polygon([(22, 8), (74, 8), (48, 44)], fill=(255, 210, 31))
+        d.polygon([(48, 44), (74, 80), (22, 80)], fill=(255, 210, 31))
+        d.line([22, 8, 74, 8], fill=GOLD, width=3)
+        d.line([22, 80, 74, 80], fill=GOLD, width=3)
+        d.line([48, 44, 48, 66], fill=(255, 210, 31), width=3)
+        d.ellipse([38, 72, 58, 78], fill=(255, 210, 31))
+        # green globe, right: gold outline + meridian/latitude lines
+        d.ellipse([198, 16, 268, 86], fill=(30, 170, 110), outline=GOLD, width=2)
+        d.line([233, 18, 233, 84], fill=GOLD, width=1)
+        d.line([202, 38, 264, 38], fill=GOLD, width=1)
+        d.line([202, 62, 264, 62], fill=GOLD, width=1)
+        # red thermometer spearing the globe's left edge
+        d.rectangle([176, 10, 182, 62], fill=(220, 40, 40))
+        d.ellipse([170, 58, 184, 72], fill=(220, 40, 40))
+        for ty in (18, 32, 46):
+            d.line([168, ty, 174, ty], fill=GOLD, width=2)
     elif key == "akvan":
         d.rectangle([0, 0, w, h], fill=(12, 70, 160))
-        cx, cy = w // 2, h // 2 + 4
-        for r in range(34, 4, -6):
+        # spiral centred left (DeepSeek v20): three paper arcs + ink eye
+        cx, cy = 58, 42
+        for r in (6, 14, 22):
             d.arc([cx - r, cy - r, cx + r, cy + r], 20, 300,
-                  fill=(255, 255, 255), width=3)
-        d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=(255, 210, 31))
-        # arrows inland, top left (scrim covers the bottom) + 145 km/h gauge
+                  fill="white", width=3)
+        d.ellipse([cx - 4, cy - 4, cx + 4, cy + 4], fill=INK)
+        # arrows inland, top left + red warning triangle top right
         for i in range(3):
             ax = 14 + i * 22
             d.line([ax, 14, ax + 12, 14], fill=YELLOW, width=2)
             d.polygon([(ax + 12, 10), (ax + 12, 18), (ax + 18, 14)],
                       fill=YELLOW)
-        d.text((w - 8, 8), "145 km/h", font=F_SRC, fill="white", anchor="ra")
+        d.polygon([(175, 12), (185, 32), (165, 32)], fill=RED)
+        d.text((175, 22), "!", font=F_ART2_S, fill=YELLOW, anchor="mm")
     elif key == "kerch":
         d.rectangle([0, 0, w, h], fill=(14, 30, 80))
-        # bridge arc + deck across the strait, explosion star mid-span
+        # bridge arc + gold deck with a gap mid-span, red span sagging (DeepSeek v20)
         d.arc([8, 30, w - 8, h + 30], 200, 340, fill=(150, 150, 150), width=3)
-        d.rectangle([8, h - 40, w - 8, h - 36], fill=(150, 150, 150))
-        for px in (30, w // 2, w - 34):
+        d.rectangle([8, h - 40, 100, h - 36], fill=GOLD)
+        d.rectangle([130, h - 40, w - 8, h - 36], fill=GOLD)
+        for px in (30, w - 34):
             d.line([px, h - 40, px, h - 52], fill=(150, 150, 150), width=2)
-        cx, cy = w // 2, h - 52
-        for a in range(0, 360, 45):
-            d.line([cx, cy, cx + int(16 * math.cos(math.radians(a))),
-                    cy + int(16 * math.sin(math.radians(a)))],
-                   fill=YELLOW, width=3)
-        d.ellipse([cx - 6, cy - 6, cx + 6, cy + 6], fill=(255, 120, 0))
-        # halted train, smoke rising
+        d.polygon([(100, h - 40), (130, h - 40), (122, h - 28), (108, h - 28)],
+                  fill=(200, 40, 40))
+        # halted train, three smoke ellipses rising from the gap
         d.rectangle([w - 66, h - 34, w - 14, h - 22], fill=(200, 40, 40))
-        d.ellipse([cx - 14, 8, cx - 4, 18], fill=(180, 180, 180))
-        d.ellipse([cx - 2, 2, cx + 10, 14], fill=(200, 200, 200))
+        d.ellipse([102, 8, 114, 18], fill=(200, 200, 200))
+        d.ellipse([112, 2, 126, 14], fill=(220, 220, 220))
+        d.ellipse([122, 8, 134, 18], fill=(200, 200, 200))
     elif key == "han":
-        d.rectangle([0, 0, w, h], fill=(26, 70, 96))
-        d.polygon([(w * 0.2, 30), (w * 0.8, 30), (w * 0.5, 12)], fill=(140, 130, 110))
-        for i in range(4):
-            cx = int(w * (0.22 + i * 0.19))
-            d.rectangle([cx, 32, cx + 10, h - 12], fill=(235, 230, 218),
-                        outline=(140, 130, 110))
-        # gavel top right + struck-through 15 top left
-        d.line([w - 44, 12, w - 16, 26], fill=(150, 100, 50), width=5)
-        d.rectangle([w - 50, 8, w - 38, 20], fill=(120, 80, 40))
+        d.rectangle([0, 0, w, h], fill=NAVY)
+        # struck-through 15 top left (the overturned sentence)
         d.text((14, 10), "15", font=F_ART2, fill="white")
         d.line([10, 26, 34, 8], fill=RED, width=3)
+        # gold gavel angled top right (DeepSeek v20)
+        d.line([w - 44, 12, w - 16, 26], fill=GOLD, width=5)
+        d.rectangle([w - 50, 8, w - 38, 20], fill=(200, 160, 40))
+        # yellow scales on a paper beam, centre right
+        d.line([140, 24, 140, 42], fill="white", width=2)
+        d.line([110, 42, 170, 42], fill="white", width=2)
+        d.polygon([(118, 42), (138, 42), (128, 58)], fill=YELLOW)
+        d.polygon([(142, 42), (162, 42), (152, 58)], fill=YELLOW)
     elif key == "greenland":
         d.rectangle([0, 0, w, h], fill=(24, 130, 200))
-        d.rectangle([0, h - 26, w, h], fill=(16, 100, 180))
-        # icebergs + Danish flag left, US flag right
-        d.polygon([(w * 0.1, h - 26), (w * 0.3, h - 62), (w * 0.5, h - 26)],
-                  fill="white")
-        d.polygon([(w * 0.55, h - 26), (w * 0.72, h - 52), (w * 0.9, h - 26)],
+        # navy sea band (DeepSeek v20)
+        d.rectangle([0, 64, w, h], fill=NAVY)
+        # paper iceberg + second smaller berg, bases on the sea
+        d.polygon([(8, 64), (40, 64), (24, 26)], fill="white")
+        d.polygon([(w * 0.55, 64), (w * 0.72, 52), (w * 0.9, 64)],
                   fill=(230, 240, 245))
-        d.rectangle([10, 8, 34, 22], fill=(200, 20, 40))
-        d.rectangle([10, 13, 34, 17], fill="white")
-        d.rectangle([20, 8, 24, 22], fill="white")
-        _flag(d, w - 36, 8, 26, 14, "us")
+        # two flags on one gold pole, right
+        d.line([150, 26, 150, 52], fill=GOLD, width=2)
+        d.rectangle([142, 26, 150, 38], fill=(200, 20, 40))
+        d.rectangle([142, 30, 150, 34], fill="white")
+        d.rectangle([145, 26, 147, 38], fill="white")
+        _flag(d, 152, 26, 8, 12, "us")
     elif key == "marathon":
         d.rectangle([0, 0, w, h], fill=(246, 241, 226))
         # track lanes + runner + finish line
@@ -494,21 +545,24 @@ def art_image(key, w, h):
         d.line([cx, cy + 2, cx + 12, cy + 8], fill=(20, 20, 20), width=3)
         d.line([cx + 4, cy + 12, cx - 6, cy + 22], fill=(20, 20, 20), width=3)
         d.line([cx + 4, cy + 12, cx + 14, cy + 20], fill=(20, 20, 20), width=3)
-        d.rectangle([w - 16, 8, w - 8, h - 30], fill="white", outline=INK)
-        for i in range(0, h - 38, 10):
-            d.rectangle([w - 16, 8 + i, w - 8, 8 + i + 5], fill=INK)
+        # gold medal with a red circle-slash (the ban) (DeepSeek v20)
+        d.ellipse([128, 18, 152, 42], fill=GOLD)
+        d.ellipse([124, 14, 156, 46], outline=RED, width=3)
+        d.line([126, 16, 154, 44], fill=RED, width=3)
     elif key == "riyadh":
         d.rectangle([0, 0, w, h], fill=(10, 20, 50))
         _skyline(d, w, h, h - 30, (6, 12, 34), 11)
-        # missile trail from top right + explosion star
-        d.line([w - 12, 6, w - 60, 34], fill=(255, 220, 120), width=3)
-        cx, cy = w - 62, 36
+        # red interceptor trail rising to a gold burst (DeepSeek v20)
+        d.polygon([(20, 80), (60, 44), (120, 20), (124, 24), (64, 48), (24, 84)],
+                  fill=RED)
+        d.ellipse([114, 12, 126, 24], fill=GOLD)
         for a in range(0, 360, 45):
-            d.line([cx, cy, cx + int(14 * math.cos(math.radians(a))),
-                    cy + int(14 * math.sin(math.radians(a)))],
-                   fill=YELLOW, width=3)
-        d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=(255, 120, 0))
-        d.ellipse([w - 14, 4, w - 6, 12], fill=(255, 210, 31))
+            d.line([120, 18, 120 + int(12 * math.cos(math.radians(a))),
+                    18 + int(12 * math.sin(math.radians(a)))],
+                   fill=YELLOW, width=2)
+        # yellow city dots along the base
+        for dx in (30, 70, 110, 150, 180):
+            d.ellipse([dx, 74, dx + 4, 78], fill=YELLOW)
     elif key == "ukraine":
         d.rectangle([0, 0, w, h // 2], fill=(0, 90, 180))
         d.rectangle([0, h // 2, w, h], fill=(255, 210, 31))
@@ -581,19 +635,19 @@ def art_image(key, w, h):
         d.polygon([(w - 40, 8), (w - 12, 8), (w - 16, 24),
                    (w - 26, 16), (w - 34, 24)], fill="white",
                   outline=(120, 120, 120))
+        # paper placards held up by the crowd (DeepSeek v20)
+        for px in (24, 84, 144):
+            d.rectangle([px, 32, px + 14, 42], fill="white", outline=INK)
     elif key == "australia":
         d.rectangle([0, 0, w, h], fill=(245, 240, 228))
-        vals = [0.72, 0.6, 0.62, 0.45, 0.3]
-        bw = w // 6
-        for i, v in enumerate(vals):
-            x = 12 + i * bw
-            d.rectangle([x, h - 14 - int(v * (h - 30)), x + bw - 6, h - 14],
-                        fill=(200, 40, 40) if i == len(vals) - 1 else (90, 90, 90))
-        d.line([(12, 22), (w - 12, h - 22)], fill=RED, width=3)
-        # gauge needle at 4.9% + -44,000 ledger line (both above the scrim)
-        d.arc([w - 56, 4, w - 8, 52], 180, 360, fill=NAVY, width=2)
-        d.line([w - 32, 28, w - 16, 14], fill=RED, width=2)
-        d.text((w - 32, 32), "4.9%", font=F_SRC, fill=NAVY, anchor="ma")
+        # four navy bars rising left to right (DeepSeek v20)
+        for i, top in enumerate((52, 42, 32, 22)):
+            x = 24 + i * 40
+            d.rectangle([x, top, x + 16, 70], fill=NAVY)
+        # red arrow climbing above the bars
+        d.line([(20, 56), (164, 20)], fill=RED, width=3)
+        d.polygon([(164, 20), (148, 18), (160, 32)], fill=RED)
+        # -44,000 ledger line (kept: the other key number)
         d.text((12, 8), "-44,000", font=F_SRC, fill=RED)
     elif key == "libya":
         d.rectangle([0, 0, w, h], fill=(30, 30, 40))
@@ -722,7 +776,7 @@ def main():
         d.rounded_rectangle([cx + 4, hy + 99, cx + 4 + pw, hy + 109],
                             radius=2, fill=PILL_COL[status])
         d.text((cx + 9, hy + 98), status, font=F_PILL, fill="white")
-        d.text((cx + 10 + pw, hy + 97), "%d  %s \u00b7 %s" % (num, reg, topic),
+        d.text((cx + 10 + pw, hy + 97), "%d. %s \u00b7 %s" % (num, reg, topic),
                font=F_KICK, fill="white")
         sw = d.textlength(src, font=F_SRC)
         d.text((cx + hw - 5 - sw, hy + 97), src, font=F_SRC, fill=GOLD)
@@ -747,7 +801,7 @@ def main():
             art_text(im, idd, 0, 0, sw_, 84, big, small, F_LBL2, F_LBL2_S)
             img.paste(im, (cx, cy))
             d.rectangle([cx, cy + 84, cx + sw_, cy + 99], fill=NAVY)
-            d.text((cx + 4, cy + 85), "%d  %s \u00b7 %s" % (num, reg, topic),
+            d.text((cx + 4, cy + 85), "%d. %s \u00b7 %s" % (num, reg, topic),
                    font=F_KICK, fill="white")
             pw = d.textlength(status, font=F_PILL) + 10
             d.rounded_rectangle([cx + sw_ - 4 - pw, cy + 86, cx + sw_ - 4, cy + 96],
@@ -788,7 +842,7 @@ def main():
         row = i if i < rows else i - rows
         x = ax + col * (colw + 8)
         y = my + 22 + row * 13
-        d.text((x, y), "%d" % num, font=F_ALSO_N, fill=RED)
+        d.text((x, y), "%d." % num, font=F_ALSO_N, fill=RED)
         full = "%s: %s" % (city, txt)
         lines = wrap(d, full, F_ALSO, colw - 22, max_lines=1)
         d.text((x + 20, y), lines[0] if lines else "", font=F_ALSO, fill=INK)
