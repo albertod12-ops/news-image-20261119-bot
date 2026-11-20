@@ -474,11 +474,13 @@ def art_image(key, w, h):
             t = i / h
             d.line([0, i, w, i], fill=(int(88 + 120 * t), int(40 + 60 * t),
                                        int(140 - 60 * t)))
-        # sun, right: a BIG half-disc clipped by the edge, like a sunset
-        d.ellipse([170, 24, 222, 76], fill=(255, 190, 60))
+        # sun, CENTRE: a full disc in the middle of the sky, like a sunset
+        # (v33: the user asked for the sun in the middle, not clipped at
+        # the right edge)
+        d.ellipse([72, 24, 124, 76], fill=(255, 190, 60))
         # palm fronds silhouetted across the sun
         for py in (34, 41, 48):
-            d.line([174, py, 196, py], fill=(40, 20, 60), width=1)
+            d.line([78, py, 118, py], fill=(40, 20, 60), width=1)
         _skyline(d, w, h, h, (10, 5, 20), 11)
         # palm trees, silhouetted against the sunset (v30: the old ones
         # were straight lines radiating from a point — a starburst, not a
@@ -756,7 +758,9 @@ def art_image(key, w, h):
         # the medal was, so there is one clear "banned" element.)
         # diagonal BANNED rubber stamp, big + bold like the user's reference
         # stamp, text centred in its box, placed where the medal was
-        stamp(img, 112, 28, "BANNED", font=F_STAMP)
+        # (v33: raised 6px — the user found its lower edge touching the
+        # bottom track lane; it now sits clear of every line)
+        stamp(img, 112, 22, "BANNED", font=F_STAMP)
     elif key == "riyadh":
         d.rectangle([0, 0, w, h], fill=(10, 20, 50))
         _skyline(d, w, h, h - 30, (6, 12, 34), 11)
@@ -769,8 +773,9 @@ def art_image(key, w, h):
             for wx in (154, 162):
                 d.rectangle([wx, wy, wx + 4, wy + 4], fill=(255, 215, 154))
         # the interceptor's red trail, launched from the ground, bottom-left,
-        # climbing toward the missile
-        d.polygon([(24, 79), (60, 52), (96, 46), (100, 50), (64, 56),
+        # climbing all the way to the missile's tail (v33: the user asked
+        # for the red line to reach the rocket — it used to stop short)
+        d.polygon([(24, 79), (60, 52), (128, 34), (132, 38), (64, 56),
                    (28, 79)], fill=RED)
         # the Houthi missile, SMALL now (v32: the v31 missile was far too
         # big) — about 1/4 the size, and DIAGONAL, its tail following the
