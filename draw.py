@@ -129,6 +129,7 @@ F_KICK = font("NotoSans-Bold.ttf", 10, FNOTO)
 F_KICK_S = font("NotoSans-Bold.ttf", 9, FNOTO)  # smalls kicker: 10px made #9 touch the pill (0.3px gap)
 F_PILL = font("NotoSans-Bold.ttf", 8, FNOTO)
 F_SRC = font("NotoSans-Bold.ttf", 9, FNOTO)
+F_STAMP = font("NotoSans-Black.ttf", 12, FNOTO)  # v30: the BANNED stamp, big + bold like the user's reference
 F_HEAD = font("LiberationSerif-Bold.ttf", 20, FLIB)
 F_HEAD_S = font("LiberationSerif-Bold.ttf", 16, FLIB)
 F_DECK = font("LiberationSerif-Regular.ttf", 12, FLIB)
@@ -393,15 +394,19 @@ def _flag(d, x, y, w, h, kind):
         d.rectangle([x, y + 2 * h / 3, x + w, y + h], fill=(200, 20, 30))
 
 
-def stamp(img, x, y, text, angle=-15):
+def stamp(img, x, y, text, angle=-15, font=None):
     """Diagonal red rubber-stamp label (the #1 entry's signature device).
 
     Draws `text` in red bold caps inside a red outline box on a small
     RGBA tile, rotates it, and pastes it onto `img` at (x, y).
+    The text is centred in the box (anchor "mm") — v30 fix: it used to
+    sit top-left, so CUT and BANNED read as off-centre in their boxes.
     """
+    if font is None:
+        font = F_SRC
     tmp = Image.new("RGBA", (1, 1))
     td = ImageDraw.Draw(tmp)
-    bbox = td.textbbox((0, 0), text, font=F_SRC)
+    bbox = td.textbbox((0, 0), text, font=font)
     tw = bbox[2] - bbox[0]
     th = bbox[3] - bbox[1]
     pad = 4
@@ -411,7 +416,8 @@ def stamp(img, x, y, text, angle=-15):
     # (v29: the user's BANNED-stamp reference has a THICK border, not a
     # hairline — the outline is now 3px, like the reference.)
     sd.rectangle([2, 2, sw - 3, sh - 3], outline=(200, 16, 46, 255), width=3)
-    sd.text((pad + 2, pad + 2), text, font=F_SRC, fill=(200, 16, 46, 255))
+    sd.text((sw / 2, sh / 2), text, font=font, fill=(200, 16, 46, 255),
+            anchor="mm")
     s = s.rotate(angle, expand=True, resample=Image.BICUBIC)
     img.paste(s, (x, y), s)
 
@@ -474,11 +480,17 @@ def art_image(key, w, h):
         for py in (34, 41, 48):
             d.line([174, py, 196, py], fill=(40, 20, 60), width=1)
         _skyline(d, w, h, h, (10, 5, 20), 11)
+        # palm trees, silhouetted against the sunset (v30: the old ones
+        # were straight lines radiating from a point — a starburst, not a
+        # palm. Now a curved trunk and fronds that arch out and droop.)
         for px in (14, w - 22):
-            d.line([px, h - 30, px + 4, h - 62], fill=(10, 30, 10), width=3)
-            for a in (-50, -20, 10, 40):
-                d.line([px + 2, h - 60, px + 2 + int(22 * math.sin(math.radians(a))),
-                        h - 60 - int(14 * abs(math.cos(math.radians(a))))],
+            d.line([(px, h - 15), (px + 2, h - 30), (px + 5, h - 45),
+                    (px + 8, h - 58)], fill=(10, 30, 10), width=3)
+            cx, cy = px + 8, h - 58
+            for dx, dy in ((-19, -8), (-14, -14), (-2, -17), (12, -14),
+                           (19, -6), (16, 4)):
+                mx, my = cx + dx // 2, cy + dy // 2 - 3
+                d.line([(cx, cy), (mx, my), (cx + dx, cy + dy)],
                        fill=(10, 30, 10), width=2)
         # NZ midnight: gold clock top left, PS5 box, 2 fans with hair (not 4 dots)
         d.ellipse([8, 8, 28, 28], fill=GOLD)
@@ -609,24 +621,25 @@ def art_image(key, w, h):
         d.rectangle([0, 64, w, h], fill=(10, 22, 60))
         d.line([0, 68, w, 68], fill=(30, 60, 110), width=1)
         d.line([0, 74, w, 74], fill=(30, 60, 110), width=1)
-        # two pointed towers (pylon + pointed cap, like the reference)
-        for tx in (36, 168):
-            d.rectangle([tx, 14, tx + 8, 44], fill=(150, 150, 150))
-            d.polygon([(tx, 14), (tx + 8, 14), (tx + 4, 6)],
-                      fill=(150, 150, 150))
+        # two pointed towers (pylon + pointed cap, like the reference) —
+        # bright and thick now, so the silhouette reads at any size
+        for tx in (34, 166):
+            d.rectangle([tx, 8, tx + 10, 44], fill=(210, 210, 210))
+            d.polygon([(tx, 8), (tx + 10, 8), (tx + 5, 0)],
+                      fill=(210, 210, 210))
         # the main suspension cable: side spans + a sagging span between
-        # the tower tops (lowest at the middle, y30)
-        d.line([(8, 40), (40, 8)], fill=(200, 200, 200), width=1)
-        d.line([(40, 8), (55, 18), (70, 25), (85, 29), (98, 30),
-                (111, 29), (126, 25), (141, 18), (156, 11), (172, 8)],
-               fill=(200, 200, 200), width=1)
-        d.line([(172, 8), (188, 40)], fill=(200, 200, 200), width=1)
+        # the tower tops (lowest at the middle, y30) — thick and white
+        d.line([(8, 40), (39, 6)], fill="white", width=2)
+        d.line([(39, 6), (55, 18), (70, 25), (85, 29), (98, 30),
+                (111, 29), (126, 25), (141, 18), (156, 11), (171, 6)],
+               fill="white", width=2)
+        d.line([(171, 6), (188, 40)], fill="white", width=2)
         # vertical suspenders from the cable down to the intact deck
         for sx, sy in ((55, 18), (70, 25), (85, 29), (100, 30), (180, 24)):
-            d.line([sx, sy, sx, 40], fill=(200, 200, 200), width=1)
-        # gold deck, left and right of the blown-out middle span
-        d.rectangle([8, 40, 120, 44], fill=(255, 205, 40))
-        d.rectangle([160, 40, 188, 44], fill=(255, 205, 40))
+            d.line([sx, sy, sx, 40], fill="white", width=1)
+        # gold deck, left and right of the blown-out middle span — thicker
+        d.rectangle([8, 40, 120, 46], fill=(255, 205, 40))
+        d.rectangle([160, 40, 188, 46], fill=(255, 205, 40))
         # the blown-out span, collapsed into the water (dark red, jagged)
         d.polygon([(120, 40), (160, 40), (150, 52), (140, 62), (130, 52)],
                   fill=(120, 30, 30))
@@ -648,12 +661,14 @@ def art_image(key, w, h):
     elif key == "han":
         d.rectangle([0, 0, w, h], fill=NAVY)
         # the overturned sentence, big and unmistakable: "15 YEARS" with a
-        # red X through it (v26: the small "15" + single slash was too quiet)
+        # red PROHIBITION sign over it (v30: the user's circular-BANNED
+        # reference — a thick red ring + diagonal bar — replaces the red X;
+        # the X hid the digits, the ring frames them)
         # (v28 fix: the X was drawn OVER the text, so its thick arms hid the
-        # "1" and the "YEARS". Now the X is drawn first and the text sits on
-        # top of it — fully readable, still crossed out.)
-        d.line([8, 6, 50, 44], fill=RED, width=4)
-        d.line([50, 6, 8, 44], fill=RED, width=4)
+        # "1" and the "YEARS". The ring + bar are drawn first and the text
+        # sits on top of them — fully readable, still cancelled.)
+        d.ellipse([6, 2, 52, 48], outline=RED, width=4)
+        d.line([13, 9, 45, 41], fill=RED, width=4)
         d.text((16, 10), "15", font=F_ART, fill=(11, 27, 51))
         d.text((14, 8), "15", font=F_ART, fill="white")
         d.text((14, 34), "YEARS", font=F_ART2_S, fill="white")
@@ -716,9 +731,9 @@ def art_image(key, w, h):
         d.line([70, 52, 82, 64], fill=(20, 20, 20), width=3)
         d.line([70, 52, 58, 66], fill=(20, 20, 20), width=3)
         d.rectangle([61, 40, 67, 46], fill="white")
-        # diagonal BANNED rubber stamp, top-right (v29: moved 6px left so
-        # the thicker 3px border stays clear of the right edge)
-        stamp(img, 136, 4, "BANNED")
+        # diagonal BANNED rubber stamp, top-right (v30: big + bold, like
+        # the user's reference stamp, and the text is centred in its box)
+        stamp(img, 128, 4, "BANNED", font=F_STAMP)
         # gold medal with a BOLD red prohibition sign over it (v29: the
         # user's reference is a thick red ring + thick diagonal bar, not a
         # hairline — ring and slash are now 5px)
@@ -738,27 +753,28 @@ def art_image(key, w, h):
                 d.rectangle([wx, wy, wx + 4, wy + 4], fill=(255, 215, 154))
         # the interceptor's red trail, launched from the ground, bottom-left,
         # climbing toward the missile
-        d.polygon([(24, 79), (60, 52), (104, 38), (108, 42), (64, 56),
+        d.polygon([(24, 79), (60, 52), (96, 46), (100, 50), (64, 56),
                    (28, 79)], fill=RED)
-        # the Houthi missile, sleek like the user's reference: a pointed
-        # nose, a tapered body, fins at the tail, and a long orange flame —
-        # nose a few pixels from the tower wall, a split second before impact
-        d.polygon([(148, 12), (120, 38), (116, 34)], fill=(220, 220, 220))
-        d.polygon([(118, 36), (108, 46), (114, 38)], fill=(180, 180, 180))
-        d.polygon([(116, 34), (106, 28), (112, 36)], fill=(180, 180, 180))
-        d.polygon([(118, 36), (102, 50), (110, 42)], fill=(255, 140, 40))
-        d.polygon([(116, 37), (106, 46), (110, 42)], fill=(255, 220, 80))
+        # the Houthi missile, BIG and sleek like the user's reference: a
+        # pointed nose at the tower wall, a tapered body, fins at the tail,
+        # and a long orange flame (v30: the v29 missile was too small to
+        # read at page size)
+        d.polygon([(152, 20), (102, 51), (98, 45)], fill=(220, 220, 220))
+        d.polygon([(100, 48), (86, 60), (96, 50)], fill=(180, 180, 180))
+        d.polygon([(98, 45), (84, 38), (94, 47)], fill=(180, 180, 180))
+        d.polygon([(100, 48), (78, 64), (90, 56)], fill=(255, 140, 40))
+        d.polygon([(98, 49), (84, 60), (90, 56)], fill=(255, 220, 80))
         # the explosion starting around the missile: orange burst, yellow
         # core, sparks, smoke and debris
-        d.ellipse([138, 6, 158, 26], fill=(255, 140, 40))
-        d.ellipse([143, 11, 153, 21], fill=(255, 220, 80))
+        d.ellipse([140, 8, 164, 32], fill=(255, 140, 40))
+        d.ellipse([146, 14, 158, 26], fill=(255, 220, 80))
         for a in range(0, 360, 30):
-            d.line([148, 16, 148 + int(13 * math.cos(math.radians(a))),
-                    16 + int(13 * math.sin(math.radians(a)))],
+            d.line([152, 20, 152 + int(16 * math.cos(math.radians(a))),
+                    20 + int(16 * math.sin(math.radians(a)))],
                    fill=YELLOW, width=2)
-        d.ellipse([132, 2, 142, 10], fill=(200, 200, 200))
-        d.ellipse([156, 0, 166, 8], fill=(180, 180, 180))
-        for dx, dy in ((126, 10), (162, 26), (134, 28), (158, 30)):
+        d.ellipse([132, 2, 144, 12], fill=(200, 200, 200))
+        d.ellipse([160, 0, 172, 10], fill=(180, 180, 180))
+        for dx, dy in ((126, 12), (168, 30), (134, 32), (164, 34)):
             d.rectangle([dx, dy, dx + 2, dy + 2], fill=(255, 200, 100))
         # small warm city dots along the base
         for dx in (30, 70, 110, 150, 180):
