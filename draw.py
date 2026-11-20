@@ -24,6 +24,17 @@ biar teks terlihat jelas"):
     enlargement pushes heroes onward +5 more: stats 110, timeline 154,
     heroes 191, smalls 379, map 711, date check 963, footer 997, ending
     ~1020.
+v18 vs v17: user order 2026-11-20 16:04 WIB ("Okey bagus, untuk kotak garis
+merah bawah masih blm berjarak bagus tuh") — the bottom spacing of the two
+red boxes was still unbalanced (pixel-measured v17): timeline box "THE DAY"
+glyphs 160..168 / "BY HOURS" 174..182 in box 154..186 = 6px top / 4px
+bottom; DATE CHECK glyphs 968..976 / 980..988 in box 963..991 = 5px top /
+3px bottom. Both texts moved up 1px: timeline "THE DAY" 156 -> 155,
+"BY HOURS" 170 -> 169 (gaps 5/5); DATE CHECK lines dy+1 -> dy+0 and
+dy+13 -> dy+12 (gaps 4/4). No band shifts.
+NOTE: the first draw.py run right after an edit can render the pre-edit file
+(sizes matched the previous version in v15/v16/v18) — always verify with 2-3
+runs and take the later sha.
 Run: python3 draw.py  -> writes entry.png in this directory."""
 import json
 import math
@@ -681,8 +692,8 @@ def main():
 
     # ---- THE DAY BY HOURS timeline 154-186 ----
     d.rectangle([12, 154, 100, 186], fill=RED)
-    d.text((56, 156), "THE DAY", font=F_TTIME, fill="white", anchor="ma")
-    d.text((56, 170), "BY HOURS", font=F_TTIME, fill="white", anchor="ma")
+    d.text((56, 155), "THE DAY", font=F_TTIME, fill="white", anchor="ma")
+    d.text((56, 169), "BY HOURS", font=F_TTIME, fill="white", anchor="ma")
     bx = 104
     bw = (W - 12 - bx) / 8.0
     for i, (t, txt) in enumerate(TIMELINE):
@@ -794,7 +805,7 @@ def main():
            "(Fri 20 Nov) \u00b7 COP31's final deal (Fri 20 Nov).")
     clines = wrap(d, chk, F_DATECHK, 976, max_lines=2)
     for j, ln in enumerate(clines):
-        d.text((20, dy + 1 + j * 12), ln, font=F_DATECHK, fill=INK)
+        d.text((20, dy + j * 12), ln, font=F_DATECHK, fill=INK)
 
     # ---- footer 997-1020 ----
     fy = 997
