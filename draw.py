@@ -208,7 +208,7 @@ FRONT = [
     (9, "COPENHAGEN", "SECURITY", "AP", "REPORTED",
      "Denmark backs Arctic pact with US",
      "Parliament votes 109\u20130; more US bases in Greenland.",
-     "109\u20130", "ARCTIC PACT APPROVED", "greenland"),
+     "", "", "greenland"),
     (10, "RIYADH", "WAR", "REUTERS", "REPORTED",
      "Saudis shoot down Houthi missiles",
      "Sirens at 04:42; missile intercepted, debris damage.",
@@ -309,7 +309,12 @@ def wrap(d, text, fnt, width, max_lines=None):
 
 
 def art_text(img, d, x, y, w, h, big, small, f_big, f_small):
-    """Big short text inside the art: white bold on a dark scrim, bottom-left."""
+    """Big short text inside the art: white bold on a dark scrim, bottom-left.
+    (v34: if both strings are empty, draw nothing — the Greenland pact
+    document already carries its own title, flags and score, so its scrim
+    would only cover the red 109-0 box.)"""
+    if not big and not small:
+        return
     bw = int(d.textlength(big, font=f_big))
     sw = int(d.textlength(small, font=f_small)) if small else 0
     if max(bw, sw) + 22 > w:
@@ -704,16 +709,22 @@ def art_image(key, w, h):
         # navy sea band, waterline at y62
         d.rectangle([0, 62, w, h], fill=NAVY)
         # the pact document, centred, with both flags and the vote on it
-        d.rectangle([36, 8, 160, 52], fill="white", outline=(120, 110, 95))
-        d.text((98, 12), "ARCTIC PACT", font=F_SRC, fill=(20, 20, 20),
-               anchor="ma")
-        # Danish flag (left) and US flag (right) on the document
-        d.rectangle([58, 22, 78, 34], fill=(200, 20, 40))
-        d.rectangle([58, 27, 78, 29], fill="white")
-        d.rectangle([65, 22, 67, 34], fill="white")
-        _flag(d, 118, 22, 20, 12, "us")
-        # the vote, in red, centred at the foot of the document
-        d.text((98, 42), "109-0", font=F_ART2_S, fill=RED, anchor="mm")
+        # (v34: the user asked for a BLACK box behind the ARCTIC PACT title,
+        # space between the title and the flags, and a RED box behind the
+        # 109-0 score — like the "3 YEARS" box in the Marathon art)
+        d.rectangle([36, 6, 160, 60], fill="white", outline=(120, 110, 95))
+        # black title box across the top of the document
+        d.rectangle([36, 6, 160, 22], fill=(20, 20, 20))
+        d.text((98, 14), "ARCTIC PACT", font=F_SRC, fill="white",
+               anchor="mm")
+        # Danish flag (left) and US flag (right), 5px below the title box
+        d.rectangle([58, 27, 78, 39], fill=(200, 20, 40))
+        d.rectangle([58, 32, 78, 34], fill="white")
+        d.rectangle([65, 27, 67, 39], fill="white")
+        _flag(d, 118, 27, 20, 12, "us")
+        # the vote, white text in a RED box at the foot of the document
+        d.rectangle([66, 43, 130, 59], fill=RED)
+        d.text((98, 51), "109-0", font=F_ART2_S, fill="white", anchor="mm")
         # (no APPROVED stamp here: the word is 8 letters, ~59px rotated,
         # and every placement either ran off the edge or sat on the title.
         # The document + flags + 109-0 already say "approved".)
