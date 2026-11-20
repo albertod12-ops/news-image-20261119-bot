@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""news-image-20261119 v9: 36 stories, newspaper front page after the top 1.
+"""news-image-20261119 v10: 36 stories, newspaper front page after the top 1.
 Draws entry.png (1024x1024, deterministic) from world.geo.json only.
-v9 vs v8: masthead date "Thursday 19 November 2026" now 60px in the same
-face as the top 1 (NotoSerifDisplay-Black, measured 876px wide — the old 46px
-spanned only 672px). The masthead band grew 10px (0-98) so the bigger title
-fits between the kicker and the red deck line; every band below shifted +10px
-(gold rule 98, stats 102, timeline 144, heroes 176, smalls 364, map 696, date
-check 948, footer 982, ending ~1005).
+v10 vs v9: the masthead date font was WRONG — v9 used NotoSerifDisplay-Black
+(a high-contrast Didone), but hazel-harbor-63 uses a Times-style oldstyle
+serif. Side-by-side font test (equal width) proved Liberation Serif Bold
+(Times) matches top 1's letterforms; Display Black, Noto Serif Black and
+DejaVu Serif Bold do not. Title now LiberationSerif-Bold 72px, measured 889px
+wide (v9: 876px; top 1: ~985px from x=15, ours starts at x=98 after the date
+box). Masthead band grew 6px more (0-104); every band below shifted +6px
+(gold rule 104, stats 108, timeline 150, heroes 182, smalls 370, map 702,
+date check 954, footer 988, ending ~1011).
 Run: python3 draw.py  -> writes entry.png in this directory."""
 import json
 import math
@@ -28,13 +31,14 @@ SAND = (238, 220, 165)
 
 FD = "/usr/share/fonts/truetype/dejavu"
 FNOTO = "/usr/share/fonts/truetype/noto"
+FLIB = "/usr/share/fonts/truetype/liberation"
 
 
 def font(name, size, base=FD):
     return ImageFont.truetype(os.path.join(base, name), size)
 
 
-F_TITLE = font("NotoSerifDisplay-Black.ttf", 60, FNOTO)
+F_TITLE = font("LiberationSerif-Bold.ttf", 72, FLIB)
 F_EYE = font("NotoSans-Black.ttf", 13, FNOTO)
 F_DECKLINE = font("NotoSerif-Italic.ttf", 16, FNOTO)
 F_DATE = font("NotoSans-Black.ttf", 30, FNOTO)
@@ -626,45 +630,45 @@ def main():
     img = Image.new("RGB", (W, H), PAPER)
     d = ImageDraw.Draw(img)
 
-    # ---- masthead 0-98: date in the top-1 face, bigger (60px Display Black) ----
+    # ---- masthead 0-104: date in the top-1 face (Liberation Serif Bold = Times) ----
     d.rectangle([12, 8, 86, 80], fill=RED)
     d.text((49, 12), "NOV", font=F_DATE2, fill="white", anchor="ma")
     d.text((49, 26), "19", font=F_DATE, fill="white", anchor="ma")
     d.text((49, 60), "THU \u00b7 2026", font=F_DATE2, fill="white", anchor="ma")
     d.text((98, 3), "THE WORLD IN ONE DAY", font=F_EYE, fill=RED)
-    d.text((98, -2), "Thursday 19 November 2026", font=F_TITLE, fill=INK)
-    d.text((98, 79), "Trump, Xi and Putin share one table \u00b7 World Court finds "
+    d.text((98, 3), "Thursday 19 November 2026", font=F_TITLE, fill=INK)
+    d.text((98, 84), "Trump, Xi and Putin share one table \u00b7 World Court finds "
            "Myanmar guilty of genocide \u00b7 COP31's draft drops fossil fuels",
            font=F_DECKLINE, fill=RED)
     d.text((1012, 5), "36 STORIES \u00b7 7 REGIONS \u00b7 ONE PAGE",
            font=F_EYE, fill=INK, anchor="ra")
-    d.rectangle([0, 98, W, 101], fill=GOLD)
+    d.rectangle([0, 104, W, 107], fill=GOLD)
 
-    # ---- big-numbers strip 102-140 ----
+    # ---- big-numbers strip 108-146 ----
     sw6 = (W - 24) / 6.0
     for si, (val, cap) in enumerate(STATS):
         sx = 12 + si * sw6
         if si > 0:
-            d.line([sx - 6, 106, sx - 6, 136], fill=RULE, width=1)
-        d.text((sx + 4, 104), val, font=F_STATB, fill=NAVY)
-        d.text((sx + 4, 126), cap, font=F_STATC, fill=GREY)
+            d.line([sx - 6, 112, sx - 6, 142], fill=RULE, width=1)
+        d.text((sx + 4, 110), val, font=F_STATB, fill=NAVY)
+        d.text((sx + 4, 132), cap, font=F_STATC, fill=GREY)
 
-    # ---- THE DAY BY HOURS timeline 144-172 ----
-    d.rectangle([12, 144, 100, 172], fill=RED)
-    d.text((56, 150), "THE DAY", font=F_TTIME, fill="white", anchor="ma")
-    d.text((56, 163), "BY HOURS", font=F_TTIME, fill="white", anchor="ma")
+    # ---- THE DAY BY HOURS timeline 150-178 ----
+    d.rectangle([12, 150, 100, 178], fill=RED)
+    d.text((56, 156), "THE DAY", font=F_TTIME, fill="white", anchor="ma")
+    d.text((56, 169), "BY HOURS", font=F_TTIME, fill="white", anchor="ma")
     bx = 104
     bw = (W - 12 - bx) / 8.0
     for i, (t, txt) in enumerate(TIMELINE):
         cx = bx + i * bw
         if i > 0:
-            d.line([cx, 146, cx, 170], fill=RULE, width=1)
-        d.text((cx + 5, 147), t, font=F_TTIME, fill=NAVY)
-        d.text((cx + 5, 159), txt, font=F_TTEXT, fill=INK)
-    d.line([12, 174, W - 12, 174], fill=RULE, width=1)
+            d.line([cx, 152, cx, 176], fill=RULE, width=1)
+        d.text((cx + 5, 153), t, font=F_TTIME, fill=NAVY)
+        d.text((cx + 5, 165), txt, font=F_TTEXT, fill=INK)
+    d.line([12, 180, W - 12, 180], fill=RULE, width=1)
 
-    # ---- heroes 176-358: lead 396 wide, rails 294 (hierarchy, not equal thirds) ----
-    hy = 176
+    # ---- heroes 182-364: lead 396 wide, rails 294 (hierarchy, not equal thirds) ----
+    hy = 182
     hws = [396, 294, 294]
     for i, (num, reg, topic, src, status, head, deck, big, small, key) in enumerate(FRONT[:3]):
         hw = hws[i]
@@ -695,14 +699,14 @@ def main():
             d.text((cx + 3, hy + 116 + len(lines) * 22 + 2 + j * 13),
                    ln, font=F_DECK, fill=(60, 60, 60))
 
-    # ---- smalls 364-690 (2 rows x 5, image 196x84) ----
+    # ---- smalls 370-696 (2 rows x 5, image 196x84) ----
     sw_ = 196
     for r in range(2):
         for c in range(5):
             k = 3 + r * 5 + c
             num, reg, topic, src, status, head, deck, big, small, key = FRONT[k]
             cx = 12 + c * (sw_ + 8)
-            cy = 364 + r * 166
+            cy = 370 + r * 166
             im = art_image(key, sw_, 84)
             idd = ImageDraw.Draw(im)
             art_text(im, idd, 0, 0, sw_, 84, big, small, F_LBL2, F_LBL2_S)
@@ -722,8 +726,8 @@ def main():
                 d.text((cx + 2, cy + 102 + len(lines) * 18 + 1 + j * 13),
                        ln, font=F_DECK_S, fill=(60, 60, 60))
 
-    # ---- map + also 696-936 (map taller, also-list roomier) ----
-    my = 696
+    # ---- map + also 702-942 (map taller, also-list roomier) ----
+    my = 702
     d.text((12, my), "WHERE IT HAPPENED", font=F_SEC, fill=INK)
     d.line([12, my + 16, 348, my + 16], fill=INK, width=1)
     d.rectangle([12, my + 22, 348, my + 172], fill=OCEAN, outline=RULE, width=1)
@@ -754,8 +758,8 @@ def main():
         lines = wrap(d, full, F_ALSO, colw - 22, max_lines=1)
         d.text((x + 20, y), lines[0] if lines else "", font=F_ALSO, fill=INK)
 
-    # ---- date check 948-976: thin 2-line band (was a 40px box) ----
-    dy = 948
+    # ---- date check 954-982: thin 2-line band (was a 40px box) ----
+    dy = 954
     d.rectangle([12, dy, 1012, dy + 28], outline=RED, width=2)
     chk = ("DATE CHECK \u2014 Left out, first reported Wednesday 18 November: Iranian drone "
            "interceptions \u00b7 EU's \u20ac45bn loan \u00b7 House 251\u201311 Jeffries vote \u00b7 "
@@ -766,8 +770,8 @@ def main():
     for j, ln in enumerate(clines):
         d.text((20, dy + 3 + j * 12), ln, font=F_DATECHK, fill=INK)
 
-    # ---- footer 982-1012 ----
-    fy = 982
+    # ---- footer 988-1018 ----
+    fy = 988
     d.text((512, fy), "Reads at three sizes: the date and 3 leads at thumbnail size \u00b7 "
            "13 pictures at half size \u00b7 all 36 stories at full size.",
            font=F_FOOT, fill=GREY, anchor="ma")
