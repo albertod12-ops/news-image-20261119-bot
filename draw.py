@@ -498,18 +498,18 @@ def art_image(key, w, h):
         d.rectangle([0, 0, w, h], fill=(246, 242, 233))
         for gy in range(0, h, 14):
             d.line([0, gy, w, gy], fill=(180, 190, 210), width=1)
-        # (v26: the thin stair-step + tiny CEO read as a sketch, not an IPO.
-        # A bold gold bar chart + a big red arrow + the price in a red box.)
-        # four gold bars rising steeply, left to right
-        for i, top in enumerate((58, 46, 34, 22)):
-            x = 24 + i * 40
-            d.rectangle([x, top, x + 24, 70], fill=GOLD)
-        # thick red arrow climbing over the bars
-        d.line([(20, 62), (172, 18)], fill=RED, width=4)
-        d.polygon([(172, 18), (154, 16), (168, 30)], fill=RED)
-        # the IPO price in a bold red box, top-left (like top 1's "IPO $83")
-        d.rectangle([8, 4, 50, 20], fill=RED)
-        d.text((29, 12), "$83", font=F_ART2_S, fill="white", anchor="mm")
+        # (v27: the gold bars + arrow read like any chart. The story is the
+        # RECORD — $81.3bn topping SpaceX's $75bn — so show the two bars
+        # side by side, Anthropic's taller.)
+        # Anthropic's record bar, gold, with its number above and name inside
+        d.rectangle([45, 22, 85, 70], fill=GOLD)
+        d.text((65, 14), "$81.3BN", font=F_ART2_S, fill=RED, anchor="mm")
+        d.text((65, 30), "ANT", font=F_ART2_S, fill="white", anchor="mm")
+        # SpaceX's bar, shorter, navy, with its number above and name inside
+        d.rectangle([115, 34, 155, 70], fill=NAVY)
+        d.text((135, 26), "$75BN", font=F_ART2_S, fill=(20, 20, 20),
+               anchor="mm")
+        d.text((135, 42), "SPACEX", font=F_SRC, fill="white", anchor="mm")
     elif key == "icj":
         d.rectangle([0, 0, w, h], fill=(226, 218, 196))
         # pediment + 15 columns: first 9 paper, last 6 ink = the 9-6 vote (DeepSeek v20)
@@ -543,19 +543,22 @@ def art_image(key, w, h):
         d.rectangle([0, 0, w, h], fill=(11, 110, 110))
         # THE DRAFT ITSELF: a white document with the two cuts struck through.
         # (v26: the hourglass/globe/thermometer read as abstract symbols;
-        # the document says "draft drops" at a glance.)
+        # the document says "draft drops" at a glance. v27: every line of
+        # text centred in the box, as the user asked.)
         d.rectangle([16, 6, 180, 52], fill="white", outline=(120, 110, 95))
-        d.text((22, 10), "COP31 DRAFT", font=F_SRC, fill=(20, 20, 20))
+        d.text((98, 10), "COP31 DRAFT", font=F_SRC, fill=(20, 20, 20),
+               anchor="ma")
         for ly in (19, 24):
-            d.line([22, ly, 120, ly], fill=(180, 180, 180), width=1)
-        # FOSSIL FUELS struck through in red
-        d.text((22, 27), "FOSSIL FUELS", font=F_ART2_S, fill=RED)
-        d.line([20, 33, 118, 33], fill=RED, width=3)
-        # $120BN struck through in red (kept well above the text scrim)
-        d.text((22, 37), "$120BN", font=F_ART2_S, fill=RED)
-        d.line([20, 43, 78, 43], fill=RED, width=3)
-        # diagonal CUT stamp on the document
-        stamp(img, 128, 6, "CUT")
+            d.line([49, ly, 147, ly], fill=(180, 180, 180), width=1)
+        # FOSSIL FUELS struck through in red, centred (73px wide)
+        d.text((98, 27), "FOSSIL FUELS", font=F_ART2_S, fill=RED,
+               anchor="mm")
+        d.line([60, 33, 136, 33], fill=RED, width=3)
+        # $120BN struck through in red, centred (41.5px wide)
+        d.text((98, 37), "$120BN", font=F_ART2_S, fill=RED, anchor="mm")
+        d.line([75, 43, 121, 43], fill=RED, width=3)
+        # diagonal CUT stamp on the document, clear of the centred text
+        stamp(img, 140, 6, "CUT")
         # small globe, top right (the planet the deal is about)
         d.ellipse([220, 12, 268, 60], fill=(30, 170, 110), outline=GOLD,
                   width=2)
@@ -563,26 +566,32 @@ def art_image(key, w, h):
         d.ellipse([248, 40, 260, 52], fill=(79, 163, 122))
     elif key == "akvan":
         d.rectangle([0, 0, w, h], fill=(12, 70, 160))
-        # (v26: the small spiral + boat did not say "cyclone bearing down
-        # on a coast, 204,070 listed to move". Now the cyclone IS the picture.)
-        # a LARGE cyclone spiral, centred, the dominant element
-        cx, cy = 98, 40
+        # (v27: the cyclone was neat but small and still read as a target.
+        # Now it fills the frame, with rain bands and wind streaks, and the
+        # coast it is about to hit is bigger too.)
+        # a HUGE cyclone spiral, centred left, with a clear dark eye
+        cx, cy = 85, 42
         d.arc([cx - 32, cy - 32, cx + 32, cy + 32], 20, 300,
-              fill="white", width=4)
+              fill="white", width=5)
         d.arc([cx - 24, cy - 24, cx + 24, cy + 24], 140, 60,
-              fill="white", width=3)
+              fill="white", width=4)
         d.arc([cx - 16, cy - 16, cx + 16, cy + 16], 260, 180,
               fill="white", width=3)
         d.arc([cx - 8, cy - 8, cx + 8, cy + 8], 20, 300,
               fill="white", width=2)
         d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=(30, 50, 90))
-        # the Odisha coast at the bottom, with houses; a yellow arrow shows
-        # people moving inland, away from the sea
+        # wind streaks curling around the spiral
+        for sx, sy, ex, ey in ((30, 14, 44, 20), (128, 12, 114, 20),
+                               (30, 66, 46, 60), (128, 68, 114, 60),
+                               (52, 6, 62, 16), (118, 76, 108, 66)):
+            d.line([sx, sy, ex, ey], fill=(200, 220, 240), width=2)
+        # the Odisha coast at the bottom, houses bigger; a yellow arrow
+        # shows people moving inland, away from the sea
         d.polygon([(0, 80), (0, 68), (60, 66), (120, 68), (196, 66),
                    (196, 80)], fill=(8, 40, 90))
         for hx in (130, 160, 185):
-            d.rectangle([hx, 58, hx + 12, 66], fill=(240, 230, 210))
-            d.polygon([(hx, 58), (hx + 12, 58), (hx + 6, 52)],
+            d.rectangle([hx, 56, hx + 14, 66], fill=(240, 230, 210))
+            d.polygon([(hx, 56), (hx + 14, 56), (hx + 7, 50)],
                       fill=(180, 60, 40))
         d.line([170, 64, 170, 48], fill=YELLOW, width=3)
         d.polygon([(170, 44), (164, 52), (176, 52)], fill=YELLOW)
@@ -638,37 +647,36 @@ def art_image(key, w, h):
         d.line([50, 6, 8, 44], fill=RED, width=4)
         # diagonal OVERTURNED rubber stamp, top centre (the #1 entry's device)
         stamp(img, 60, 6, "OVERTURNED")
-        # gold gavel as a real prop, top right: head + handle + striking block
-        d.rectangle([146, 22, 165, 27], fill=(91, 58, 30))
-        d.line([146, 22, 165, 22], fill=(138, 97, 54), width=1)
-        d.rectangle([150, 8, 165, 15], fill=GOLD)
-        d.line([158, 15, 150, 22], fill=GOLD, width=3)
-        # gold scales on a paper beam, centre right
-        d.line([140, 24, 140, 42], fill="white", width=2)
-        d.line([110, 42, 170, 42], fill="white", width=2)
-        d.polygon([(118, 42), (138, 42), (128, 58)], fill=GOLD)
-        d.polygon([(142, 42), (162, 42), (152, 58)], fill=GOLD)
+        # a BIG gold gavel as the court's symbol, top right: head + long
+        # handle + striking block (v27: the scales were clutter, removed)
+        d.rectangle([140, 30, 168, 36], fill=(91, 58, 30))
+        d.line([140, 30, 168, 30], fill=(138, 97, 54), width=1)
+        d.rectangle([148, 8, 172, 18], fill=GOLD)
+        d.line([160, 18, 148, 30], fill=GOLD, width=4)
     elif key == "greenland":
         d.rectangle([0, 0, w, h], fill=(24, 130, 200))
-        # (v26: an iceberg + stacked flags did not say "parliament votes
-        # 109-0 for a pact with the US". Now the vote IS the picture.)
+        # (v27: flags + iceberg + a vote box were three separate ideas.
+        # Now the PACT itself is the picture: a document both sides sign,
+        # with the vote on it.)
         # navy sea band, waterline at y62
         d.rectangle([0, 62, w, h], fill=NAVY)
-        # paper iceberg, bottom-left, with a light-blue facet
-        d.polygon([(8, 62), (50, 62), (30, 34)], fill="white")
-        d.polygon([(30, 34), (50, 62), (40, 62)], fill=(191, 227, 242))
-        # the pact: Danish and US flags planted side by side in the ice
-        d.line([94, 18, 94, 62], fill=GOLD, width=2)
-        d.rectangle([94, 18, 112, 30], fill=(200, 20, 40))
-        d.rectangle([94, 23, 112, 25], fill="white")
-        d.rectangle([99, 18, 101, 30], fill="white")
-        d.line([134, 18, 134, 62], fill=GOLD, width=2)
-        _flag(d, 134, 18, 18, 12, "us")
-        # the vote, in a bold red box top-right
-        d.rectangle([150, 6, 192, 22], fill=RED)
-        d.text((171, 14), "109-0", font=F_ART2_S, fill="white", anchor="mm")
-        # diagonal APPROVED rubber stamp, top-left
-        stamp(img, 8, 6, "APPROVED")
+        # the pact document, centred, with both flags and the vote on it
+        d.rectangle([36, 8, 160, 52], fill="white", outline=(120, 110, 95))
+        d.text((98, 12), "ARCTIC PACT", font=F_SRC, fill=(20, 20, 20),
+               anchor="ma")
+        # Danish flag (left) and US flag (right) on the document
+        d.rectangle([58, 22, 78, 34], fill=(200, 20, 40))
+        d.rectangle([58, 27, 78, 29], fill="white")
+        d.rectangle([65, 22, 67, 34], fill="white")
+        _flag(d, 118, 22, 20, 12, "us")
+        # the vote, in red, centred at the foot of the document
+        d.text((98, 42), "109-0", font=F_ART2_S, fill=RED, anchor="mm")
+        # (no APPROVED stamp here: the word is 8 letters, ~59px rotated,
+        # and every placement either ran off the edge or sat on the title.
+        # The document + flags + 109-0 already say "approved".)
+        # a small iceberg at the bottom-right, clear of the text scrim
+        d.polygon([(160, 70), (190, 70), (175, 52)], fill="white")
+        d.polygon([(175, 52), (190, 70), (182, 70)], fill=(191, 227, 242))
     elif key == "marathon":
         d.rectangle([0, 0, w, h], fill=(246, 241, 226))
         # (v26: the runner was a stick figure and the ban was a small medal.
@@ -684,16 +692,18 @@ def art_image(key, w, h):
         d.rectangle([8, 11, 44, 15], fill=(200, 30, 30))
         d.rectangle([8, 15, 44, 16], fill="white")
         d.rectangle([8, 16, 44, 20], fill=(30, 140, 60))
-        # the ban, spelled out in red, top-centre
-        d.text((98, 6), "3 YEARS", font=F_ART2_S, fill=RED)
-        # a bigger runner, mid-stride, shifted left; white bib on the chest
-        d.ellipse([65, 10, 77, 22], fill=(20, 20, 20))
-        d.line([71, 22, 77, 40], fill=(20, 20, 20), width=4)
-        d.line([71, 26, 59, 18], fill=(20, 20, 20), width=3)
-        d.line([71, 26, 83, 34], fill=(20, 20, 20), width=3)
-        d.line([77, 40, 89, 52], fill=(20, 20, 20), width=3)
-        d.line([77, 40, 65, 54], fill=(20, 20, 20), width=3)
-        d.rectangle([68, 28, 74, 34], fill="white")
+        # the ban, spelled out in a red box, text centred in it (v27)
+        d.rectangle([70, 4, 126, 20], fill=RED)
+        d.text((98, 12), "3 YEARS", font=F_ART2_S, fill="white", anchor="mm")
+        # a bigger runner, mid-stride, shifted down-left so the box is clear;
+        # white bib on the chest
+        d.ellipse([58, 22, 70, 34], fill=(20, 20, 20))
+        d.line([64, 34, 70, 52], fill=(20, 20, 20), width=4)
+        d.line([64, 38, 52, 30], fill=(20, 20, 20), width=3)
+        d.line([64, 38, 76, 46], fill=(20, 20, 20), width=3)
+        d.line([70, 52, 82, 64], fill=(20, 20, 20), width=3)
+        d.line([70, 52, 58, 66], fill=(20, 20, 20), width=3)
+        d.rectangle([61, 40, 67, 46], fill="white")
         # diagonal BANNED rubber stamp, top-right, above the medal
         stamp(img, 142, 4, "BANNED")
         # gold medal with a red circle-slash that fits the medal (the ban)
@@ -705,18 +715,18 @@ def art_image(key, w, h):
         _skyline(d, w, h, h - 30, (6, 12, 34), 11)
         # (v26: only a trail + a burst — no missile to be seen. Now the
         # missile itself, before the intercept, is the picture.)
-        # the interceptor's red trail, launched from the ground, bottom-left
-        d.polygon([(24, 79), (60, 52), (100, 38), (104, 42), (64, 56),
+        # the interceptor's red trail, launched from the ground, bottom-left,
+        # climbing toward the distant missile
+        d.polygon([(24, 79), (60, 52), (108, 34), (112, 38), (64, 56),
                    (28, 79)], fill=RED)
-        # the Houthi missile, flying up-right: grey body, nose cone, fins,
-        # orange flame at the tail
-        d.line([100, 45, 128, 22], fill=(220, 220, 220), width=7)
-        d.polygon([(128, 22), (140, 12), (132, 26)], fill=(220, 220, 220))
-        d.polygon([(100, 45), (88, 56), (94, 50)], fill=(180, 180, 180))
-        d.polygon([(100, 45), (88, 42), (94, 46)], fill=(180, 180, 180))
-        d.polygon([(98, 47), (82, 60), (90, 52)], fill=(255, 140, 40))
-        d.polygon([(96, 48), (86, 56), (90, 52)], fill=(255, 220, 80))
-        # the intercept burst, small and ahead of the missile (upper right)
+        # the Houthi missile, SMALL and far away, about to be intercepted:
+        # a thin grey rocket with a nose cone and a small flame, right
+        # below the burst it is about to hit
+        d.line([118, 32, 136, 16], fill=(220, 220, 220), width=4)
+        d.polygon([(136, 16), (144, 10), (138, 20)], fill=(220, 220, 220))
+        d.polygon([(118, 32), (110, 40), (114, 34)], fill=(180, 180, 180))
+        d.polygon([(116, 33), (106, 42), (112, 36)], fill=(255, 140, 40))
+        # the intercept burst, just ahead of the missile (upper right)
         d.ellipse([144, 6, 158, 20], fill=GOLD)
         for a in range(0, 360, 45):
             d.line([151, 13, 151 + int(9 * math.cos(math.radians(a))),
@@ -790,15 +800,17 @@ def art_image(key, w, h):
         d.rectangle([0, 66, w, h], fill=(120, 110, 100))
         for dx in range(6, w, 20):
             d.line([dx, 73, dx + 10, 73], fill="white", width=2)
-        # the PARO NACIONAL banner, carried on two poles at the front
-        d.line([118, 10, 118, 34], fill=(60, 40, 20), width=2)
-        d.line([182, 10, 182, 34], fill=(60, 40, 20), width=2)
-        d.rectangle([110, 10, 190, 28], fill="white", outline=RED, width=2)
-        d.text((150, 19), "PARO NACIONAL", font=F_SRC, fill=RED,
+        # the PARO NACIONAL banner, carried on two poles at the front:
+        # wider (96px) so the 75px text has real breathing room, and the
+        # text placed by exact measurement so it is pixel-centred (v27)
+        d.line([108, 10, 108, 34], fill=(60, 40, 20), width=2)
+        d.line([188, 10, 188, 34], fill=(60, 40, 20), width=2)
+        d.rectangle([100, 10, 196, 28], fill="white", outline=RED, width=2)
+        d.text((148, 19), "PARO NACIONAL", font=F_SRC, fill=RED,
                anchor="mm")
-        # FECODE banner, top-left
-        d.rectangle([8, 8, 62, 24], fill=NAVY)
-        d.text((35, 16), "FECODE", font=F_SRC, fill="white", anchor="mm")
+        # FECODE banner, top-left, widened the same way
+        d.rectangle([8, 8, 70, 24], fill=NAVY)
+        d.text((39, 16), "FECODE", font=F_SRC, fill="white", anchor="mm")
         # five marchers walking right, in stride, shirts in varied colours
         skins = [(200, 140, 90), (220, 180, 140), (180, 120, 80),
                  (210, 160, 110), (190, 130, 85)]
