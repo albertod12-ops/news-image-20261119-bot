@@ -1,14 +1,29 @@
 #!/usr/bin/env python3
-"""news-image-20261119 v16: 36 stories, newspaper front page after the top 1.
+"""news-image-20261119 v17: 36 stories, newspaper front page after the top 1.
 Draws entry.png (1024x1024, deterministic) from world.geo.json only.
-v16 vs v15: user order 2026-11-20 15:53 WIB ("Perkecil lagi Thursday nya,
-tapi lebar masih sama, berikan jarak antara garis dan text di atas bawah") —
-Thursday font 68px -> 60px LiberationSerif-Bold (Times, same face as top 1),
-but letter-spaced (tracking ~3.94px/gap, new draw_tracked helper) so it still
-spans exactly the same 839px width. The rule above the title gets breathing
-room: line y 17 -> 19 (6px below the kicker), title drawn at y 14 (glyphs
-26..81, 7px below the line). Deck y 83 and gold rule 103 unchanged — no band
-shifts.
+v17 vs v16: user order 2026-11-20 15:58 WIB ("Buat sama seperti sebelumnya,
+tapi jarak antara garis dan text sama, kemudian untuk text di dalam kotak yang
+biru dari angka 1-14 itu harus berada di tengah-tengah kotak, jangan terlalu
+bawah begitu. Dan setiap garis atau kotak yang kamu buat, harus ada jarak,
+biar teks terlihat jelas"):
+  - Masthead rule gaps equalised (pixel-measured: v16 line touched the right
+    kicker — its glyphs ended at y 19, the line was at 19; left gap 2px,
+    below 7px). Both kickers now y=1 (glyphs 5..15), line y=20, title drawn
+    at y=13 (glyphs 25..80): 5px above the line, 5px below it.
+  - Blue kicker strips (heroes 1-3 + smalls 4-13): text was 2.5px below
+    centre (pixel-measured hero strip: glyphs 284..291 in strip 277..293).
+    All strip text now centred on the glyph centre: heroes kicker/source
+    hy+97, pill text hy+98 (pill rect already centred); smalls kicker cy+84,
+    pill rect cy+86..96, pill text cy+85.
+  - Every line/box now has clear distance: deck glyphs end y 105, so the
+    gold rule moves 103 -> 108 (3px gap); timeline red box enlarged 28 ->
+    32px tall because "BY HOURS" glyphs overflowed its bottom by ~3px
+    (white pixels at rows 178/180); stats dividers extended to 148 so the
+    captions do not pass them; DATE CHECK text moved to dy+1 (gaps 5 top /
+    3 bottom). All bands below shift +5 (gold rule) and the timeline
+    enlargement pushes heroes onward +5 more: stats 110, timeline 154,
+    heroes 191, smalls 379, map 711, date check 963, footer 997, ending
+    ~1020.
 Run: python3 draw.py  -> writes entry.png in this directory."""
 import json
 import math
@@ -640,46 +655,46 @@ def main():
     img = Image.new("RGB", (W, H), PAPER)
     d = ImageDraw.Draw(img)
 
-    # ---- masthead 0-103: date in the top-1 face (Liberation Serif Bold = Times) ----
+    # ---- masthead 0-108: date in the top-1 face (Liberation Serif Bold = Times) ----
     d.rectangle([12, 8, 86, 80], fill=RED)
     d.text((49, 12), "NOV", font=F_DATE2, fill="white", anchor="ma")
     d.text((49, 26), "19", font=F_DATE, fill="white", anchor="ma")
     d.text((49, 60), "THU \u00b7 2026", font=F_DATE2, fill="white", anchor="ma")
-    d.text((98, 3), "THE WORLD IN ONE DAY", font=F_EYE, fill=RED)
-    d.line([98, 19, 1012, 19], fill=INK, width=1)
-    draw_tracked(d, 98, 14, "Thursday 19 November 2026", F_TITLE, INK, 839)
+    d.text((98, 1), "THE WORLD IN ONE DAY", font=F_EYE, fill=RED)
+    d.line([98, 20, 1012, 20], fill=INK, width=1)
+    draw_tracked(d, 98, 13, "Thursday 19 November 2026", F_TITLE, INK, 839)
     d.text((98, 83), "Trump, Xi and Putin share one table \u00b7 World Court finds "
            "Myanmar guilty of genocide \u00b7 COP31's draft drops fossil fuels",
            font=F_DECKLINE, fill=RED)
-    d.text((1012, 5), "36 STORIES \u00b7 7 REGIONS \u00b7 ONE PAGE",
+    d.text((1012, 1), "36 STORIES \u00b7 7 REGIONS \u00b7 ONE PAGE",
            font=F_EYE, fill=INK, anchor="ra")
-    d.rectangle([0, 103, W, 106], fill=GOLD)
+    d.rectangle([0, 108, W, 111], fill=GOLD)
 
-    # ---- big-numbers strip 105-143 ----
+    # ---- big-numbers strip 110-148 ----
     sw6 = (W - 24) / 6.0
     for si, (val, cap) in enumerate(STATS):
         sx = 12 + si * sw6
         if si > 0:
-            d.line([sx - 6, 111, sx - 6, 141], fill=RULE, width=1)
-        d.text((sx + 4, 109), val, font=F_STATB, fill=NAVY)
-        d.text((sx + 4, 131), cap, font=F_STATC, fill=GREY)
+            d.line([sx - 6, 116, sx - 6, 148], fill=RULE, width=1)
+        d.text((sx + 4, 114), val, font=F_STATB, fill=NAVY)
+        d.text((sx + 4, 136), cap, font=F_STATC, fill=GREY)
 
-    # ---- THE DAY BY HOURS timeline 149-177 ----
-    d.rectangle([12, 149, 100, 177], fill=RED)
-    d.text((56, 155), "THE DAY", font=F_TTIME, fill="white", anchor="ma")
-    d.text((56, 168), "BY HOURS", font=F_TTIME, fill="white", anchor="ma")
+    # ---- THE DAY BY HOURS timeline 154-186 ----
+    d.rectangle([12, 154, 100, 186], fill=RED)
+    d.text((56, 156), "THE DAY", font=F_TTIME, fill="white", anchor="ma")
+    d.text((56, 170), "BY HOURS", font=F_TTIME, fill="white", anchor="ma")
     bx = 104
     bw = (W - 12 - bx) / 8.0
     for i, (t, txt) in enumerate(TIMELINE):
         cx = bx + i * bw
         if i > 0:
-            d.line([cx, 151, cx, 175], fill=RULE, width=1)
-        d.text((cx + 5, 152), t, font=F_TTIME, fill=NAVY)
-        d.text((cx + 5, 164), txt, font=F_TTEXT, fill=INK)
-    d.line([12, 179, W - 12, 179], fill=RULE, width=1)
+            d.line([cx, 156, cx, 184], fill=RULE, width=1)
+        d.text((cx + 5, 157), t, font=F_TTIME, fill=NAVY)
+        d.text((cx + 5, 169), txt, font=F_TTEXT, fill=INK)
+    d.line([12, 188, W - 12, 188], fill=RULE, width=1)
 
-    # ---- heroes 181-363: lead 396 wide, rails 294 (hierarchy, not equal thirds) ----
-    hy = 181
+    # ---- heroes 191-373: lead 396 wide, rails 294 (hierarchy, not equal thirds) ----
+    hy = 191
     hws = [396, 294, 294]
     for i, (num, reg, topic, src, status, head, deck, big, small, key) in enumerate(FRONT[:3]):
         hw = hws[i]
@@ -697,11 +712,11 @@ def main():
         pw = d.textlength(status, font=F_PILL) + 10
         d.rounded_rectangle([cx + 4, hy + 99, cx + 4 + pw, hy + 109],
                             radius=2, fill=PILL_COL[status])
-        d.text((cx + 9, hy + 101), status, font=F_PILL, fill="white")
-        d.text((cx + 10 + pw, hy + 100), "%d  %s \u00b7 %s" % (num, reg, topic),
+        d.text((cx + 9, hy + 98), status, font=F_PILL, fill="white")
+        d.text((cx + 10 + pw, hy + 97), "%d  %s \u00b7 %s" % (num, reg, topic),
                font=F_KICK, fill="white")
         sw = d.textlength(src, font=F_SRC)
-        d.text((cx + hw - 5 - sw, hy + 101), src, font=F_SRC, fill=GOLD)
+        d.text((cx + hw - 5 - sw, hy + 97), src, font=F_SRC, fill=GOLD)
         lines = wrap(d, head, F_HEAD, hw - 6, max_lines=2)
         for j, ln in enumerate(lines):
             d.text((cx + 3, hy + 116 + j * 22), ln, font=F_HEAD, fill=INK)
@@ -710,25 +725,25 @@ def main():
             d.text((cx + 3, hy + 116 + len(lines) * 22 + 2 + j * 13),
                    ln, font=F_DECK, fill=(60, 60, 60))
 
-    # ---- smalls 369-695 (2 rows x 5, image 196x84) ----
+    # ---- smalls 379-705 (2 rows x 5, image 196x84) ----
     sw_ = 196
     for r in range(2):
         for c in range(5):
             k = 3 + r * 5 + c
             num, reg, topic, src, status, head, deck, big, small, key = FRONT[k]
             cx = 12 + c * (sw_ + 8)
-            cy = 369 + r * 166
+            cy = 379 + r * 166
             im = art_image(key, sw_, 84)
             idd = ImageDraw.Draw(im)
             art_text(im, idd, 0, 0, sw_, 84, big, small, F_LBL2, F_LBL2_S)
             img.paste(im, (cx, cy))
             d.rectangle([cx, cy + 84, cx + sw_, cy + 99], fill=NAVY)
-            d.text((cx + 4, cy + 87), "%d  %s \u00b7 %s" % (num, reg, topic),
+            d.text((cx + 4, cy + 85), "%d  %s \u00b7 %s" % (num, reg, topic),
                    font=F_KICK, fill="white")
             pw = d.textlength(status, font=F_PILL) + 10
-            d.rounded_rectangle([cx + sw_ - 4 - pw, cy + 87, cx + sw_ - 4, cy + 97],
+            d.rounded_rectangle([cx + sw_ - 4 - pw, cy + 86, cx + sw_ - 4, cy + 96],
                                 radius=2, fill=PILL_COL[status])
-            d.text((cx + sw_ + 1 - pw, cy + 89), status, font=F_PILL, fill="white")
+            d.text((cx + sw_ + 1 - pw, cy + 85), status, font=F_PILL, fill="white")
             lines = wrap(d, head, F_HEAD_S, sw_ - 4, max_lines=2)
             for j, ln in enumerate(lines):
                 d.text((cx + 2, cy + 102 + j * 18), ln, font=F_HEAD_S, fill=INK)
@@ -737,8 +752,8 @@ def main():
                 d.text((cx + 2, cy + 102 + len(lines) * 18 + 1 + j * 13),
                        ln, font=F_DECK_S, fill=(60, 60, 60))
 
-    # ---- map + also 701-941 (map taller, also-list roomier) ----
-    my = 701
+    # ---- map + also 711-951 (map taller, also-list roomier) ----
+    my = 711
     d.text((12, my), "WHERE IT HAPPENED", font=F_SEC, fill=INK)
     d.line([12, my + 16, 348, my + 16], fill=INK, width=1)
     d.rectangle([12, my + 22, 348, my + 172], fill=OCEAN, outline=RULE, width=1)
@@ -769,8 +784,8 @@ def main():
         lines = wrap(d, full, F_ALSO, colw - 22, max_lines=1)
         d.text((x + 20, y), lines[0] if lines else "", font=F_ALSO, fill=INK)
 
-    # ---- date check 953-981: thin 2-line band (was a 40px box) ----
-    dy = 953
+    # ---- date check 963-991: thin 2-line band (was a 40px box) ----
+    dy = 963
     d.rectangle([12, dy, 1012, dy + 28], outline=RED, width=2)
     chk = ("DATE CHECK \u2014 Left out, first reported Wednesday 18 November: Iranian drone "
            "interceptions \u00b7 EU's \u20ac45bn loan \u00b7 House 251\u201311 Jeffries vote \u00b7 "
@@ -779,10 +794,10 @@ def main():
            "(Fri 20 Nov) \u00b7 COP31's final deal (Fri 20 Nov).")
     clines = wrap(d, chk, F_DATECHK, 976, max_lines=2)
     for j, ln in enumerate(clines):
-        d.text((20, dy + 3 + j * 12), ln, font=F_DATECHK, fill=INK)
+        d.text((20, dy + 1 + j * 12), ln, font=F_DATECHK, fill=INK)
 
-    # ---- footer 987-1010 ----
-    fy = 987
+    # ---- footer 997-1020 ----
+    fy = 997
     d.text((512, fy), "Reads at three sizes: the date and 3 leads at thumbnail size \u00b7 "
            "13 pictures at half size \u00b7 all 36 stories at full size.",
            font=F_FOOT, fill=GREY, anchor="ma")
