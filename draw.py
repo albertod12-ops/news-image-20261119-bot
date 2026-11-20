@@ -621,28 +621,27 @@ def art_image(key, w, h):
         d.rectangle([0, 64, w, h], fill=(10, 22, 60))
         d.line([0, 68, w, 68], fill=(30, 60, 110), width=1)
         d.line([0, 74, w, 74], fill=(30, 60, 110), width=1)
-        # two tall towers with a spire and a crossbeam, like the reference
-        # suspension bridge (v31: the towers are taller and narrower now,
-        # with a proper spire top and a crossbeam, so the silhouette reads
-        # as the reference bridge)
-        for tx in (36, 168):
-            d.rectangle([tx, 10, tx + 8, 44], fill=(210, 210, 210))
-            d.polygon([(tx, 10), (tx + 8, 10), (tx + 4, 0)],
-                      fill=(210, 210, 210))
-            d.rectangle([tx - 2, 16, tx + 10, 19], fill=(210, 210, 210))
+        # two WIDE flat-topped towers with a crossbeam, like the reference
+        # suspension bridge (v32: the v31 spires were still thin and wispy —
+        # the reference bridges are BOLD solid silhouettes, so the towers
+        # are 12px wide now, the cable is a thick band, the deck is thick)
+        for tx in (34, 166):
+            d.rectangle([tx, 6, tx + 12, 44], fill=(225, 225, 225))
+            d.rectangle([tx - 3, 14, tx + 15, 18], fill=(225, 225, 225))
         # the main suspension cable: side spans + a deep sagging span
-        # between the tower tops (lowest at the middle, y32) — thick, white
-        d.line([(8, 42), (40, 6)], fill="white", width=2)
+        # between the tower tops (lowest at the middle, y32) — a THICK
+        # white band now, so it reads as part of the silhouette
+        d.line([(8, 42), (40, 6)], fill="white", width=4)
         d.line([(40, 6), (56, 18), (70, 26), (84, 30), (98, 32),
                 (112, 30), (126, 26), (140, 18), (156, 10), (172, 6)],
-               fill="white", width=2)
-        d.line([(172, 6), (188, 42)], fill="white", width=2)
+               fill="white", width=4)
+        d.line([(172, 6), (188, 42)], fill="white", width=4)
         # vertical suspenders from the cable down to the intact deck
         for sx, sy in ((56, 18), (70, 26), (84, 30), (98, 32), (180, 24)):
-            d.line([sx, sy, sx, 40], fill="white", width=1)
+            d.line([sx, sy, sx, 40], fill="white", width=2)
         # gold deck, left and right of the blown-out middle span — thicker
-        d.rectangle([8, 40, 120, 46], fill=(255, 205, 40))
-        d.rectangle([160, 40, 188, 46], fill=(255, 205, 40))
+        d.rectangle([8, 40, 120, 47], fill=(255, 205, 40))
+        d.rectangle([160, 40, 188, 47], fill=(255, 205, 40))
         # the blown-out span, collapsed into the water (dark red, jagged)
         d.polygon([(120, 40), (160, 40), (150, 52), (140, 62), (130, 52)],
                   fill=(120, 30, 30))
@@ -678,6 +677,17 @@ def art_image(key, w, h):
         # (v31: the OVERTURNED stamp is gone — the user found its red box
         # and red text distracting and unclear. The prohibition ring over
         # "15 YEARS" already says the sentence is cancelled.)
+        # (v32: the art looked empty after the stamp went, so the space now
+        # holds the South Korean flag (Taegeukgi) — the news is about a
+        # South Korean ex-PM. White field, red-over-blue taegeuk, four
+        # black trigrams in the corners.)
+        d.rectangle([62, 6, 132, 30], fill="white")
+        d.pieslice([89, 10, 105, 26], 180, 360, fill=(205, 33, 52))
+        d.pieslice([89, 10, 105, 26], 0, 180, fill=(0, 71, 140))
+        d.ellipse([93, 14, 101, 22], fill=(205, 33, 52))
+        d.ellipse([93, 14, 101, 22], fill=(0, 71, 140))
+        for bx, by in ((66, 9), (122, 9), (66, 22), (122, 22)):
+            d.rectangle([bx, by, bx + 8, by + 2], fill=(20, 20, 20))
         # a BIG gold gavel as the court's symbol, top right: head + long
         # handle + striking block (v27: the scales were clutter, removed)
         d.rectangle([140, 30, 168, 36], fill=(91, 58, 30))
@@ -713,10 +723,16 @@ def art_image(key, w, h):
         # (v26: the runner was a stick figure and the ban was a small medal.
         # Now a bigger, mid-stride runner, the Kenyan flag, and the ban
         # spelled out: "3 YEARS" + a BANNED stamp + a slashed medal.)
-        # track lanes
-        for i in range(3):
-            d.line([0, h - 46 + i * 12, w, h - 46 + i * 12], fill=(222, 62, 48),
-                   width=2)
+        # track lanes — broken around the BANNED stamp's box (v32: the user
+        # found the red lane lines showing through inside the BANNED box,
+        # so lanes at y34 and y46 stop before the stamp and resume after
+        # it; the bottom lane at y58 is clear of the stamp)
+        for i, ly in enumerate((34, 46, 58)):
+            if ly <= 52:
+                d.line([0, ly, 106, ly], fill=(222, 62, 48), width=2)
+                d.line([184, ly, w, ly], fill=(222, 62, 48), width=2)
+            else:
+                d.line([0, ly, w, ly], fill=(222, 62, 48), width=2)
         # Kenyan flag, top-left (black/red/green with white dividers)
         d.rectangle([8, 6, 44, 10], fill=(20, 20, 20))
         d.rectangle([8, 10, 44, 11], fill="white")
@@ -756,30 +772,29 @@ def art_image(key, w, h):
         # climbing toward the missile
         d.polygon([(24, 79), (60, 52), (96, 46), (100, 50), (64, 56),
                    (28, 79)], fill=RED)
-        # the Houthi missile, drawn like the user's reference missile: a
-        # long cylindrical body, a pointed nose cone, fins at the tail, and
-        # a long orange flame — horizontal, nose at the tower wall, a split
-        # second before impact (v31: the v30 dart was still not the
-        # reference shape)
-        d.rectangle([92, 22, 138, 30], fill=(220, 220, 220))
-        d.polygon([(138, 22), (152, 26), (138, 30)], fill=(220, 220, 220))
-        d.polygon([(92, 22), (98, 14), (104, 22)], fill=(180, 180, 180))
-        d.polygon([(92, 30), (98, 38), (104, 30)], fill=(180, 180, 180))
-        d.polygon([(92, 26), (68, 26), (92, 22)], fill=(255, 140, 40))
-        d.polygon([(92, 26), (68, 26), (92, 30)], fill=(255, 140, 40))
-        d.polygon([(92, 26), (76, 26), (92, 24)], fill=(255, 220, 80))
-        d.polygon([(92, 26), (76, 26), (92, 28)], fill=(255, 220, 80))
+        # the Houthi missile, SMALL now (v32: the v31 missile was far too
+        # big) — about 1/4 the size, and DIAGONAL, its tail following the
+        # red interceptor trail's direction (climbing up-right toward the
+        # tower), not horizontal. Nose at the tower wall, flame trailing
+        # down-left along the red line.
+        d.polygon([(150, 22), (143, 25), (143, 30)], fill=(220, 220, 220))
+        d.polygon([(143, 25), (145, 30), (133, 36), (131, 31)],
+                  fill=(220, 220, 220))
+        d.polygon([(133, 31), (129, 27), (135, 33)], fill=(180, 180, 180))
+        d.polygon([(133, 36), (129, 40), (135, 35)], fill=(180, 180, 180))
+        d.polygon([(132, 33), (118, 40), (133, 36)], fill=(255, 140, 40))
+        d.polygon([(132, 33), (124, 37), (133, 35)], fill=(255, 220, 80))
         # the explosion starting around the missile nose: orange burst,
         # yellow core, sparks, smoke and debris
-        d.ellipse([140, 14, 164, 38], fill=(255, 140, 40))
-        d.ellipse([146, 20, 158, 32], fill=(255, 220, 80))
+        d.ellipse([140, 12, 160, 32], fill=(255, 140, 40))
+        d.ellipse([145, 17, 155, 27], fill=(255, 220, 80))
         for a in range(0, 360, 30):
-            d.line([152, 26, 152 + int(16 * math.cos(math.radians(a))),
-                    26 + int(16 * math.sin(math.radians(a)))],
+            d.line([150, 22, 150 + int(12 * math.cos(math.radians(a))),
+                    22 + int(12 * math.sin(math.radians(a)))],
                    fill=YELLOW, width=2)
-        d.ellipse([132, 8, 144, 18], fill=(200, 200, 200))
-        d.ellipse([160, 4, 172, 14], fill=(180, 180, 180))
-        for dx, dy in ((126, 18), (168, 36), (134, 38), (164, 40)):
+        d.ellipse([132, 6, 144, 16], fill=(200, 200, 200))
+        d.ellipse([160, 2, 172, 12], fill=(180, 180, 180))
+        for dx, dy in ((126, 16), (168, 34), (134, 36), (164, 38)):
             d.rectangle([dx, dy, dx + 2, dy + 2], fill=(255, 200, 100))
         # small warm city dots along the base
         for dx in (30, 70, 110, 150, 180):
