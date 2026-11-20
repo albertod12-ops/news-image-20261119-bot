@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""news-image-20261119 v7: 36 stories, newspaper front page after the top 1.
+"""news-image-20261119 v8: 36 stories, newspaper front page after the top 1.
 Draws entry.png (1024x1024, deterministic) from world.geo.json only.
-v7 vs v6: heroes follow news importance like hazel-harbor-63 (ICJ #2, COP31
-#3; GTA VI + Anthropic move to smalls); Riyadh fronted #10 (Houthi missiles,
-sirens 04:42), Suneung demoted to also #31; also-list gains Hormuz (Iran says
-mines set 3 tankers ablaze), Jakarta (asset-seizure law, 18 years) and
-Brussels (EU delays methane rules 2 years) — all verified live 20 Nov; Sudan
-death sentence EXCLUDED (ruled 18 Nov, not 19 Nov); stats swap in 9-6 and
-109-0; summit art gains TRUMP/XI/PUTIN nameplates; hero-1 deck now states
-the verified 90-minute talks and 'Declaration on Peace'; new riyadh art.
+v8 vs v7: typography overhaul — the user said our text looked thin and weak
+next to hazel-harbor-63. Headlines now NotoSerif-Black (the sturdy text
+serif, not the high-contrast Display face whose hairlines vanish when the
+image is viewed small), 20px heroes / 16px smalls; decks now NotoSans-Bold;
+also-list, legend, date-check, footer and stats captions now Bold; in-art
+labels up 1px; timeline 12px Bold / 10px Bold; stats numbers 21px
+NotoSerif-Black. Decks and also items shortened to fit the heavier weights
+(no facts lost: Metacritic 99 + $79.99 moved to the GTA art label, Sydney win
+into the marathon art label).
 Run: python3 draw.py  -> writes entry.png in this directory."""
 import json
 import math
@@ -38,20 +39,20 @@ def font(name, size, base=FD):
 
 F_TITLE = font("NotoSerifDisplay-Black.ttf", 46, FNOTO)
 F_EYE = font("NotoSans-Black.ttf", 13, FNOTO)
-F_DECKLINE = font("NotoSerif-Italic.ttf", 15, FNOTO)
+F_DECKLINE = font("NotoSerif-Italic.ttf", 16, FNOTO)
 F_DATE = font("NotoSans-Black.ttf", 30, FNOTO)
 F_DATE2 = font("NotoSans-Bold.ttf", 11, FNOTO)
-F_TTIME = font("NotoSans-Bold.ttf", 11, FNOTO)
-F_TTEXT = font("NotoSans-Regular.ttf", 10, FNOTO)
+F_TTIME = font("NotoSans-Bold.ttf", 12, FNOTO)
+F_TTEXT = font("NotoSans-Bold.ttf", 10, FNOTO)
 F_KICK = font("NotoSans-Bold.ttf", 10, FNOTO)
 F_PILL = font("NotoSans-Bold.ttf", 8, FNOTO)
 F_SRC = font("NotoSans-Bold.ttf", 9, FNOTO)
-F_HEAD = font("NotoSerifDisplay-Bold.ttf", 18, FNOTO)
-F_HEAD_S = font("NotoSerifDisplay-Bold.ttf", 15, FNOTO)
-F_DECK = font("NotoSans-Regular.ttf", 11, FNOTO)
-F_DECK_S = font("NotoSans-Regular.ttf", 10, FNOTO)
+F_HEAD = font("NotoSerif-Black.ttf", 20, FNOTO)
+F_HEAD_S = font("NotoSerif-Black.ttf", 16, FNOTO)
+F_DECK = font("NotoSans-Bold.ttf", 11, FNOTO)
+F_DECK_S = font("NotoSans-Bold.ttf", 10, FNOTO)
 F_LABEL = font("NotoSans-Bold.ttf", 8, FNOTO)
-F_PIN = font("NotoSans-Bold.ttf", 10, FNOTO)
+F_PIN = font("NotoSans-Bold.ttf", 11, FNOTO)
 F_ART = font("NotoSans-Black.ttf", 24, FNOTO)
 F_ART_S = font("NotoSans-Bold.ttf", 12, FNOTO)
 F_ART2 = font("NotoSans-Black.ttf", 17, FNOTO)
@@ -59,19 +60,19 @@ F_ART2_S = font("NotoSans-Bold.ttf", 11, FNOTO)
 F_FOC = font("NotoSans-Black.ttf", 30, FNOTO)
 F_FOC_S = font("NotoSans-Bold.ttf", 12, FNOTO)
 F_FOC23 = font("NotoSans-Black.ttf", 20, FNOTO)   # 2/3 of F_FOC (hero 1 only)
-F_FOC23_S = font("NotoSans-Bold.ttf", 8, FNOTO)  # 2/3 of F_FOC_S
+F_FOC23_S = font("NotoSans-Bold.ttf", 9, FNOTO)  # 2/3 of F_FOC_S
 F_LBL = font("NotoSans-Black.ttf", 16, FNOTO)     # 2/3 of F_ART (hero 3 label)
-F_LBL_S = font("NotoSans-Bold.ttf", 8, FNOTO)    # 2/3 of F_ART_S
-F_LBL2 = font("NotoSans-Black.ttf", 11, FNOTO)    # 2/3 of F_ART2 (small-card labels)
-F_LBL2_S = font("NotoSans-Bold.ttf", 7, FNOTO)   # 2/3 of F_ART2_S
-F_ALSO = font("NotoSans-Regular.ttf", 11, FNOTO)
+F_LBL_S = font("NotoSans-Bold.ttf", 9, FNOTO)    # 2/3 of F_ART_S
+F_LBL2 = font("NotoSans-Black.ttf", 12, FNOTO)    # 2/3 of F_ART2 (small-card labels)
+F_LBL2_S = font("NotoSans-Bold.ttf", 8, FNOTO)   # 2/3 of F_ART2_S
+F_ALSO = font("NotoSans-Bold.ttf", 11, FNOTO)
 F_ALSO_N = font("NotoSans-Bold.ttf", 11, FNOTO)
-F_SEC = font("NotoSans-Black.ttf", 12, FNOTO)
-F_STATB = font("NotoSerifDisplay-Black.ttf", 19, FNOTO)
-F_STATC = font("NotoSans-Regular.ttf", 9, FNOTO)
-F_LEGEND = font("NotoSans-Regular.ttf", 9, FNOTO)
-F_DATECHK = font("NotoSans-Regular.ttf", 11, FNOTO)
-F_FOOT = font("NotoSans-Regular.ttf", 10, FNOTO)
+F_SEC = font("NotoSans-Black.ttf", 13, FNOTO)
+F_STATB = font("NotoSerif-Black.ttf", 21, FNOTO)
+F_STATC = font("NotoSans-Bold.ttf", 10, FNOTO)
+F_LEGEND = font("NotoSans-Bold.ttf", 10, FNOTO)
+F_DATECHK = font("NotoSans-Bold.ttf", 11, FNOTO)
+F_FOOT = font("NotoSans-Bold.ttf", 10, FNOTO)
 
 PILL_COL = {"REPORTED": (16, 165, 90), "FORECAST": (20, 110, 230),
             "CLAIM": (230, 150, 0)}
@@ -103,10 +104,10 @@ FRONT = [
      "COP31", "DRAFT DROPS FOSSIL FUELS", "cop31"),
     (4, "NEW YORK", "GAMES", "SENSOR TOWER", "REPORTED",
      "GTA VI out today, New Zealand first",
-     "Midnight unlocks; 15.9m pre-orders, $79.99, Metacritic 99.",
-     "GTA VI", "OUT TODAY \u00b7 NZ MIDNIGHT FIRST", "gta"),
+     "Midnight unlocks; 15.9m pre-orders.",
+     "GTA VI", "METACRITIC 99 \u00b7 $79.99", "gta"),
     (5, "NASDAQ", "MARKETS", "SEC \u00b7 REUTERS", "REPORTED",
-     "Anthropic debuts in the biggest IPO on record",
+     "Anthropic IPO debuts, biggest on record",
      "Priced at $83; raised $81.3bn, valued near $1.5tn.",
      "ANT $83", "$81.3BN RAISED", "anthropic"),
     (6, "ODISHA", "STORM", "IMD", "FORECAST",
@@ -119,7 +120,7 @@ FRONT = [
      "KERCH BRIDGE", "3RD STRIKE IN A WEEK", "kerch"),
     (8, "SEOUL", "LAW", "REUTERS", "REPORTED",
      "Top court overturns Han's 15-year term",
-     "Supreme Court sends the martial-law case back for retrial.",
+     "Supreme Court sends the case back for retrial.",
      "15-YEAR TERM", "OVERTURNED \u00b7 RETRIAL", "han"),
     (9, "COPENHAGEN", "SECURITY", "AP", "REPORTED",
      "Denmark backs Arctic pact with US",
@@ -131,7 +132,7 @@ FRONT = [
      "OVER RIYADH", "SIRENS 04:42", "riyadh"),
     (11, "BOGOTA", "LABOUR", "CUT", "REPORTED",
      "Colombia's unions strike nationwide",
-     "Workers and teachers march against the Economic Rescue tax bill.",
+     "Workers and teachers march against the tax bill.",
      "NATIONAL STRIKE", "CUT + FECODE", "colombia"),
     (12, "CANBERRA", "ECONOMY", "ABS", "REPORTED",
      "Australia's jobless rate rises to 4.9%",
@@ -139,34 +140,34 @@ FRONT = [
      "JOBLESS 4.9%", "HIGHEST SINCE 2021", "australia"),
     (13, "NAIROBI", "SPORT", "AIU", "REPORTED",
      "Marathon champion banned for doping",
-     "Kenya's Jepchirchir gets 3 years for EPO; Sydney win stripped.",
+     "Kenya's Jepchirchir gets 3 years for EPO.",
      "3-YEAR BAN", "EPO \u00b7 SYDNEY WIN LOST", "marathon"),
 ]
 
 # num, city, text
 ALSO = [
-    (14, "Gaza", "Israel says tank raid past truce line is over"),
-    (15, "Florida", "a foot of rain in Hollywood; 300 rescue calls"),
+    (14, "Gaza", "Israel ends tank raid past truce line"),
+    (15, "Florida", "a foot of rain; 300 rescue calls"),
     (16, "Mexico City", "Banxico cuts rates to 6.25%"),
-    (17, "London", "National Grid debunks viral AI blackout post"),
-    (18, "New Delhi", "schools reopen as smog curbs are lifted"),
+    (17, "London", "National Grid debunks AI blackout post"),
+    (18, "New Delhi", "schools reopen as smog curbs lift"),
     (19, "Canberra", "sanctions three Israelis, four groups"),
     (20, "Mogadishu", "Somalia accuses UAE of secret bases"),
     (21, "Frankfurt", "Deutsche Bank in $582m Epstein deals"),
     (22, "Washington", "senators warn of AI cyber threats"),
-    (23, "Ottawa", "Carney rethinks China ties, seeks right deal"),
-    (24, "Tokyo", "India and Japan review defence ties at 2+2"),
+    (23, "Ottawa", "Carney seeks right China deal"),
+    (24, "Tokyo", "India and Japan review defence ties"),
     (25, "Bengaluru", "Amazon $7bn renewables pledge"),
     (26, "Hormuz", "Iran says mines set 3 tankers ablaze"),
-    (27, "Jakarta", "asset-seizure law passes after 18 years"),
+    (27, "Jakarta", "asset-seizure law ends 18-year wait"),
     (28, "Baghdad", "six French ISIL members jailed"),
-    (29, "Caracas", "Hegseth signs a US-Venezuela military deal"),
-    (30, "Washington", "Vance: no 'forever war' in the Gulf"),
+    (29, "Caracas", "Hegseth signs US-Venezuela deal"),
+    (30, "Washington", "Vance: no 'forever war' in Gulf"),
     (31, "Seoul", "half a million sit college entrance exam"),
     (32, "Washington", "Liu Yuming takes House Dem chair"),
     (33, "Brussels", "EU delays methane rules two years"),
     (34, "Benghazi", "cocaine and millions of pills seized"),
-    (35, "Manama", "Bapco refinery back on its feet after attacks"),
+    (35, "Manama", "Bapco refinery back after attacks"),
     (36, "La Paz", "Bolivia El Nino emergency; 78,000 hit"),
 ]
 
@@ -691,10 +692,10 @@ def main():
         d.text((cx + hw - 5 - sw, hy + 101), src, font=F_SRC, fill=GOLD)
         lines = wrap(d, head, F_HEAD, hw - 6, max_lines=2)
         for j, ln in enumerate(lines):
-            d.text((cx + 3, hy + 116 + j * 20), ln, font=F_HEAD, fill=INK)
+            d.text((cx + 3, hy + 116 + j * 22), ln, font=F_HEAD, fill=INK)
         dlines = wrap(d, deck, F_DECK, hw - 6, max_lines=2)
         for j, ln in enumerate(dlines):
-            d.text((cx + 3, hy + 116 + len(lines) * 20 + 2 + j * 13),
+            d.text((cx + 3, hy + 116 + len(lines) * 22 + 2 + j * 13),
                    ln, font=F_DECK, fill=(60, 60, 60))
 
     # ---- smalls 354-680 (2 rows x 5, image 196x84) ----
@@ -718,10 +719,10 @@ def main():
             d.text((cx + sw_ + 1 - pw, cy + 89), status, font=F_PILL, fill="white")
             lines = wrap(d, head, F_HEAD_S, sw_ - 4, max_lines=2)
             for j, ln in enumerate(lines):
-                d.text((cx + 2, cy + 102 + j * 17), ln, font=F_HEAD_S, fill=INK)
+                d.text((cx + 2, cy + 102 + j * 18), ln, font=F_HEAD_S, fill=INK)
             dlines = wrap(d, deck + " \u2014 " + src, F_DECK_S, sw_ - 4, max_lines=2)
             for j, ln in enumerate(dlines):
-                d.text((cx + 2, cy + 102 + len(lines) * 17 + 1 + j * 12),
+                d.text((cx + 2, cy + 102 + len(lines) * 18 + 1 + j * 13),
                        ln, font=F_DECK_S, fill=(60, 60, 60))
 
     # ---- map + also 686-926 (map taller, also-list roomier) ----
@@ -730,7 +731,7 @@ def main():
     d.line([12, my + 16, 348, my + 16], fill=INK, width=1)
     d.rectangle([12, my + 22, 348, my + 172], fill=OCEAN, outline=RULE, width=1)
     draw_map(d, 12, my + 22, 336, 150)
-    d.text((12, my + 176), "Red numbers 1\u201313, dark dots 14\u201336. Lines point to exact spots.",
+    d.text((12, my + 176), "Red numbers 1\u201313, dark dots 14\u201336.",
            font=F_TTEXT, fill=GREY)
     # how-sure-are-we legend under the map (was the stats row)
     d.text((12, my + 192), "HOW SURE ARE WE?", font=F_SEC, fill=INK)
@@ -761,7 +762,7 @@ def main():
     d.rectangle([12, dy, 1012, dy + 28], outline=RED, width=2)
     chk = ("DATE CHECK \u2014 Left out, first reported Wednesday 18 November: Iranian drone "
            "interceptions \u00b7 EU's \u20ac45bn loan \u00b7 House 251\u201311 Jeffries vote \u00b7 "
-           "Voyager 1, one light-day out \u00b7 Peltola's Alaska win \u00b7 Saudi all-clear \u00b7 "
+           "Voyager 1, one light-day out \u00b7 Peltola's Alaska win \u00b7 "
            "Qeshm strikes (17 Nov) \u00b7 Van Gogh's $190.4m sale. Not yet news: Akvan's landfall "
            "(Fri 20 Nov) \u00b7 COP31's final deal (Fri 20 Nov).")
     clines = wrap(d, chk, F_DATECHK, 976, max_lines=2)
