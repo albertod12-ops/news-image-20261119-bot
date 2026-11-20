@@ -548,15 +548,16 @@ def art_image(key, w, h):
         d.rectangle([16, 6, 180, 52], fill="white", outline=(120, 110, 95))
         d.text((98, 10), "COP31 DRAFT", font=F_SRC, fill=(20, 20, 20),
                anchor="ma")
-        for ly in (19, 24):
-            d.line([49, ly, 147, ly], fill=(180, 180, 180), width=1)
+        # (v28 fix: the grey rule lines used to cross the title and the
+        # strike lines sat at the text's bottom edge, reading as underlines.
+        # The strike lines now run through the MIDDLE of each word.)
         # FOSSIL FUELS struck through in red, centred (73px wide)
         d.text((98, 27), "FOSSIL FUELS", font=F_ART2_S, fill=RED,
                anchor="mm")
-        d.line([60, 33, 136, 33], fill=RED, width=3)
+        d.line([60, 27, 136, 27], fill=RED, width=3)
         # $120BN struck through in red, centred (41.5px wide)
-        d.text((98, 37), "$120BN", font=F_ART2_S, fill=RED, anchor="mm")
-        d.line([75, 43, 121, 43], fill=RED, width=3)
+        d.text((98, 39), "$120BN", font=F_ART2_S, fill=RED, anchor="mm")
+        d.line([75, 39, 121, 39], fill=RED, width=3)
         # diagonal CUT stamp on the document, clear of the centred text
         stamp(img, 140, 6, "CUT")
         # small globe, top right (the planet the deal is about)
@@ -566,24 +567,26 @@ def art_image(key, w, h):
         d.ellipse([248, 40, 260, 52], fill=(79, 163, 122))
     elif key == "akvan":
         d.rectangle([0, 0, w, h], fill=(12, 70, 160))
-        # (v27: the cyclone was neat but small and still read as a target.
-        # Now it fills the frame, with rain bands and wind streaks, and the
-        # coast it is about to hit is bigger too.)
-        # a HUGE cyclone spiral, centred left, with a clear dark eye
-        cx, cy = 85, 42
-        d.arc([cx - 32, cy - 32, cx + 32, cy + 32], 20, 300,
+        # (v28: the user wants the storm rising from the BOTTOM to the TOP.
+        # The spiral is now anchored low in the frame, its arms sweeping up
+        # out of the sea and into the sky.)
+        # a HUGE cyclone spiral, centred low-right so its eye stays clear
+        # of the bottom-left text scrim, rising out of the sea and into
+        # the sky, with a clear dark eye
+        cx, cy = 125, 55
+        d.arc([cx - 24, cy - 24, cx + 24, cy + 24], 20, 300,
               fill="white", width=5)
-        d.arc([cx - 24, cy - 24, cx + 24, cy + 24], 140, 60,
+        d.arc([cx - 18, cy - 18, cx + 18, cy + 18], 140, 60,
               fill="white", width=4)
-        d.arc([cx - 16, cy - 16, cx + 16, cy + 16], 260, 180,
+        d.arc([cx - 12, cy - 12, cx + 12, cy + 12], 260, 180,
               fill="white", width=3)
-        d.arc([cx - 8, cy - 8, cx + 8, cy + 8], 20, 300,
+        d.arc([cx - 6, cy - 6, cx + 6, cy + 6], 20, 300,
               fill="white", width=2)
         d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=(30, 50, 90))
-        # wind streaks curling around the spiral
-        for sx, sy, ex, ey in ((30, 14, 44, 20), (128, 12, 114, 20),
-                               (30, 66, 46, 60), (128, 68, 114, 60),
-                               (52, 6, 62, 16), (118, 76, 108, 66)):
+        # wind streaks curling up around the spiral
+        for sx, sy, ex, ey in ((80, 30, 94, 36), (164, 26, 150, 34),
+                               (80, 66, 94, 60), (164, 68, 150, 60),
+                               (100, 22, 110, 32), (150, 14, 140, 26)):
             d.line([sx, sy, ex, ey], fill=(200, 220, 240), width=2)
         # the Odisha coast at the bottom, houses bigger; a yellow arrow
         # shows people moving inland, away from the sea
@@ -640,11 +643,14 @@ def art_image(key, w, h):
         d.rectangle([0, 0, w, h], fill=NAVY)
         # the overturned sentence, big and unmistakable: "15 YEARS" with a
         # red X through it (v26: the small "15" + single slash was too quiet)
+        # (v28 fix: the X was drawn OVER the text, so its thick arms hid the
+        # "1" and the "YEARS". Now the X is drawn first and the text sits on
+        # top of it — fully readable, still crossed out.)
+        d.line([8, 6, 50, 44], fill=RED, width=4)
+        d.line([50, 6, 8, 44], fill=RED, width=4)
         d.text((16, 10), "15", font=F_ART, fill=(11, 27, 51))
         d.text((14, 8), "15", font=F_ART, fill="white")
         d.text((14, 34), "YEARS", font=F_ART2_S, fill="white")
-        d.line([8, 6, 50, 44], fill=RED, width=4)
-        d.line([50, 6, 8, 44], fill=RED, width=4)
         # diagonal OVERTURNED rubber stamp, top centre (the #1 entry's device)
         stamp(img, 60, 6, "OVERTURNED")
         # a BIG gold gavel as the court's symbol, top right: head + long
@@ -704,34 +710,46 @@ def art_image(key, w, h):
         d.line([70, 52, 82, 64], fill=(20, 20, 20), width=3)
         d.line([70, 52, 58, 66], fill=(20, 20, 20), width=3)
         d.rectangle([61, 40, 67, 46], fill="white")
-        # diagonal BANNED rubber stamp, top-right, above the medal
+        # diagonal BANNED rubber stamp, top-right
         stamp(img, 142, 4, "BANNED")
-        # gold medal with a red circle-slash that fits the medal (the ban)
-        d.ellipse([128, 18, 152, 42], fill=GOLD)
-        d.ellipse([128, 18, 152, 42], outline=RED, width=3)
-        d.line([130, 20, 150, 40], fill=RED, width=3)
+        # gold medal with a red circle-slash that fits the medal (the ban);
+        # moved down-left (v28) so the stamp no longer sits on it — the
+        # "B" in BANNED used to be hidden behind the medal's top edge
+        d.ellipse([120, 28, 144, 52], fill=GOLD)
+        d.ellipse([120, 28, 144, 52], outline=RED, width=3)
+        d.line([122, 30, 142, 50], fill=RED, width=3)
     elif key == "riyadh":
         d.rectangle([0, 0, w, h], fill=(10, 20, 50))
         _skyline(d, w, h, h - 30, (6, 12, 34), 11)
-        # (v26: only a trail + a burst — no missile to be seen. Now the
-        # missile itself, before the intercept, is the picture.)
+        # (v28: the missile now sits right against a tall tower, a split
+        # second before impact, with the explosion already starting around
+        # it — the interceptor caught it at the building.)
+        # a tall tower on the right, the missile's target (lit windows)
+        d.rectangle([150, 14, 172, 70], fill=(8, 16, 40))
+        for wy in (22, 32, 42, 52, 62):
+            for wx in (154, 162):
+                d.rectangle([wx, wy, wx + 4, wy + 4], fill=(255, 215, 154))
         # the interceptor's red trail, launched from the ground, bottom-left,
-        # climbing toward the distant missile
-        d.polygon([(24, 79), (60, 52), (108, 34), (112, 38), (64, 56),
+        # climbing toward the missile
+        d.polygon([(24, 79), (60, 52), (104, 38), (108, 42), (64, 56),
                    (28, 79)], fill=RED)
-        # the Houthi missile, SMALL and far away, about to be intercepted:
-        # a thin grey rocket with a nose cone and a small flame, right
-        # below the burst it is about to hit
-        d.line([118, 32, 136, 16], fill=(220, 220, 220), width=4)
-        d.polygon([(136, 16), (144, 10), (138, 20)], fill=(220, 220, 220))
-        d.polygon([(118, 32), (110, 40), (114, 34)], fill=(180, 180, 180))
-        d.polygon([(116, 33), (106, 42), (112, 36)], fill=(255, 140, 40))
-        # the intercept burst, just ahead of the missile (upper right)
-        d.ellipse([144, 6, 158, 20], fill=GOLD)
-        for a in range(0, 360, 45):
-            d.line([151, 13, 151 + int(9 * math.cos(math.radians(a))),
-                    13 + int(9 * math.sin(math.radians(a)))],
+        # the Houthi missile, small, nose a few pixels from the tower wall
+        d.line([118, 36, 140, 18], fill=(220, 220, 220), width=4)
+        d.polygon([(140, 18), (148, 12), (142, 22)], fill=(220, 220, 220))
+        d.polygon([(118, 36), (110, 44), (114, 38)], fill=(180, 180, 180))
+        d.polygon([(116, 37), (106, 46), (112, 40)], fill=(255, 140, 40))
+        # the explosion starting around the missile: orange burst, yellow
+        # core, sparks, smoke and debris
+        d.ellipse([138, 6, 158, 26], fill=(255, 140, 40))
+        d.ellipse([143, 11, 153, 21], fill=(255, 220, 80))
+        for a in range(0, 360, 30):
+            d.line([148, 16, 148 + int(13 * math.cos(math.radians(a))),
+                    16 + int(13 * math.sin(math.radians(a)))],
                    fill=YELLOW, width=2)
+        d.ellipse([132, 2, 142, 10], fill=(200, 200, 200))
+        d.ellipse([156, 0, 166, 8], fill=(180, 180, 180))
+        for dx, dy in ((126, 10), (162, 26), (134, 28), (158, 30)):
+            d.rectangle([dx, dy, dx + 2, dy + 2], fill=(255, 200, 100))
         # small warm city dots along the base
         for dx in (30, 70, 110, 150, 180):
             d.ellipse([dx, 74, dx + 2, 76], fill=(255, 215, 154))
