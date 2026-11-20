@@ -765,10 +765,11 @@ def art_image(key, w, h):
         d.line([170, 36, 170, 56], fill="white", width=1)
         d.line([160, 46, 180, 46], fill="white", width=1)
     elif key == "marathon":
-        # (v37: the user said v36 still felt flat — a lone runner + a stamp
-        # on plain tan. Now it has a RACE around it: a crowd stand at the
-        # top, track lanes under the runner, and speed lines behind him.
-        # The "3 YEARS" box + Kenyan flag + big BANNED stamp stay.)
+        # (v39: the user asked for the runner ON A WINNER'S PODIUM holding
+        # a TROPHY. Now she stands on the 1st-place podium, trophy raised
+        # — the champion moment, with the BANNED stamp as the twist. The
+        # track lanes are gone (a podium is not a track); the crowd,
+        # Kenyan flag and "3 YEARS" box stay.)
         d.rectangle([0, 0, w, h], fill=(228, 200, 150))
         # crowd stand: a dark band across the top, heads in a row
         d.rectangle([0, 0, w, 16], fill=(40, 40, 60))
@@ -776,12 +777,6 @@ def art_image(key, w, h):
             d.ellipse([hx, 5, hx + 7, 12], fill=(230, 200, 160))
         for hx in range(102, 190, 13):
             d.ellipse([hx, 8, hx + 6, 14], fill=(120, 80, 50))
-        # track lanes under the runner
-        d.line([0, 48, w, 48], fill=(222, 62, 48), width=2)
-        d.line([0, 64, w, 64], fill=(222, 62, 48), width=2)
-        # (v38: the 3 white "speed lines" are GONE — the user asked what
-        # they were for; they read as random white lines, not motion, so
-        # they are removed. The crowd + lanes already carry the energy.)
         # Kenyan flag, small, top-left (on the crowd band)
         d.rectangle([8, 6, 32, 10], fill=(20, 20, 20))
         d.rectangle([8, 10, 32, 11], fill="white")
@@ -791,19 +786,30 @@ def art_image(key, w, h):
         # the ban, spelled out in a red box, text centred in it
         d.rectangle([36, 6, 84, 20], fill=RED)
         d.text((60, 13), "3 YEARS", font=F_ART2_S, fill="white", anchor="mm")
-        # ONE big runner, mid-stride to the right, centre-left
+        # the winner's podium: 1st tallest in the centre, 2nd + 3rd beside
+        d.rectangle([52, 64, 80, 80], fill=(220, 220, 220))
+        d.rectangle([116, 68, 144, 80], fill=(220, 220, 220))
+        d.rectangle([80, 56, 116, 80], fill="white")
+        d.rectangle([80, 56, 116, 59], fill=GOLD)
+        d.text((66, 72), "2", font=F_ART2_S, fill=(20, 20, 20), anchor="mm")
+        d.text((130, 74), "3", font=F_ART2_S, fill=(20, 20, 20), anchor="mm")
+        d.text((98, 68), "1", font=F_ART2_S, fill=(20, 20, 20), anchor="mm")
+        # the champion, standing on the 1st-place podium, trophy raised
         SKIN = (120, 80, 50)
-        d.ellipse([70, 24, 90, 44], fill=SKIN)
-        d.ellipse([70, 22, 90, 32], fill=(20, 20, 20))
-        d.polygon([(72, 44), (88, 44), (86, 60), (74, 60)], fill=(200, 30, 30))
-        d.rectangle([74, 60, 86, 66], fill=(20, 20, 20))
-        d.line([74, 46, 62, 38], fill=SKIN, width=4)
-        d.line([86, 46, 98, 54], fill=SKIN, width=4)
-        d.line([82, 66, 96, 78], fill=SKIN, width=4)
-        d.line([78, 66, 64, 78], fill=SKIN, width=4)
-        d.rectangle([76, 50, 84, 56], fill="white")
+        d.ellipse([88, 24, 102, 38], fill=SKIN)
+        d.ellipse([88, 22, 102, 30], fill=(20, 20, 20))
+        d.polygon([(90, 38), (100, 38), (98, 52), (92, 52)], fill=(200, 30, 30))
+        d.rectangle([90, 52, 100, 56], fill=(20, 20, 20))
+        # left arm down at her side, right arm raised holding the trophy
+        d.line([90, 42, 84, 50], fill=SKIN, width=3)
+        d.line([98, 42, 110, 26], fill=SKIN, width=3)
+        d.rectangle([92, 44, 98, 50], fill="white")
+        # the gold trophy cup in her raised hand
+        d.polygon([(104, 10), (122, 10), (119, 22), (107, 22)], fill=GOLD)
+        d.rectangle([111, 22, 115, 26], fill=GOLD)
+        d.rectangle([107, 26, 119, 29], fill=GOLD)
         # ONE big diagonal BANNED stamp, right, like the top-1's
-        stamp(img, 118, 16, "BANNED", font=F_STAMP)
+        stamp(img, 132, 16, "BANNED", font=F_STAMP)
     elif key == "riyadh":
         d.rectangle([0, 0, w, h], fill=(10, 20, 50))
         _skyline(d, w, h, h - 30, (6, 12, 34), 11)
