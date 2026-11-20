@@ -408,7 +408,9 @@ def stamp(img, x, y, text, angle=-15):
     sw, sh = tw + pad * 2 + 4, th + pad * 2 + 4
     s = Image.new("RGBA", (sw, sh), (0, 0, 0, 0))
     sd = ImageDraw.Draw(s)
-    sd.rectangle([2, 2, sw - 3, sh - 3], outline=(200, 16, 46, 255), width=2)
+    # (v29: the user's BANNED-stamp reference has a THICK border, not a
+    # hairline — the outline is now 3px, like the reference.)
+    sd.rectangle([2, 2, sw - 3, sh - 3], outline=(200, 16, 46, 255), width=3)
     sd.text((pad + 2, pad + 2), text, font=F_SRC, fill=(200, 16, 46, 255))
     s = s.rotate(angle, expand=True, resample=Image.BICUBIC)
     img.paste(s, (x, y), s)
@@ -567,57 +569,61 @@ def art_image(key, w, h):
         d.ellipse([248, 40, 260, 52], fill=(79, 163, 122))
     elif key == "akvan":
         d.rectangle([0, 0, w, h], fill=(12, 70, 160))
-        # (v28: the user wants the storm rising from the BOTTOM to the TOP.
-        # The spiral is now anchored low in the frame, its arms sweeping up
-        # out of the sea and into the sky.)
-        # a HUGE cyclone spiral, centred low-right so its eye stays clear
-        # of the bottom-left text scrim, rising out of the sea and into
-        # the sky, with a clear dark eye
-        cx, cy = 125, 55
-        d.arc([cx - 24, cy - 24, cx + 24, cy + 24], 20, 300,
-              fill="white", width=5)
-        d.arc([cx - 18, cy - 18, cx + 18, cy + 18], 140, 60,
-              fill="white", width=4)
-        d.arc([cx - 12, cy - 12, cx + 12, cy + 12], 260, 180,
-              fill="white", width=3)
-        d.arc([cx - 6, cy - 6, cx + 6, cy + 6], 20, 300,
-              fill="white", width=2)
-        d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=(30, 50, 90))
-        # wind streaks curling up around the spiral
-        for sx, sy, ex, ey in ((80, 30, 94, 36), (164, 26, 150, 34),
-                               (80, 66, 94, 60), (164, 68, 150, 60),
-                               (100, 22, 110, 32), (150, 14, 140, 26)):
-            d.line([sx, sy, ex, ey], fill=(200, 220, 240), width=2)
-        # the Odisha coast at the bottom, houses bigger; a yellow arrow
-        # shows people moving inland, away from the sea
+        # (v29: the top-down spiral read as a target. The user's reference
+        # is a TORNADO seen from the side — a wide disc on top, a twisting
+        # funnel narrowing down to a cloud base. That is the storm now.)
+        # the wide disc on top (the cloud top), with an inner oval
+        d.ellipse([65, 6, 145, 16], outline="white", width=2)
+        d.ellipse([84, 9, 126, 13], outline="white", width=1)
+        # the twisting funnel: stacked rings, narrowing as they fall, each
+        # offset a little so the funnel reads as turning
+        for ry, rw, ro in ((16, 72, 0), (24, 58, 3), (32, 44, -3),
+                           (40, 32, 3), (48, 22, -2), (56, 14, 0)):
+            cx = 105 + ro
+            d.ellipse([cx - rw // 2, ry, cx + rw // 2, ry + 8],
+                      outline="white", width=2)
+        # the cloud base the funnel touches down into
+        for bx, by, bw, bh in ((65, 60, 34, 12), (85, 58, 36, 14),
+                               (108, 60, 34, 12)):
+            d.ellipse([bx, by, bx + bw, by + bh], fill=(240, 240, 245))
+        # the Odisha coast at the bottom; two houses and a yellow arrow
+        # showing people moving inland, away from the sea
         d.polygon([(0, 80), (0, 68), (60, 66), (120, 68), (196, 66),
                    (196, 80)], fill=(8, 40, 90))
-        for hx in (130, 160, 185):
+        for hx in (155, 178):
             d.rectangle([hx, 56, hx + 14, 66], fill=(240, 230, 210))
             d.polygon([(hx, 56), (hx + 14, 56), (hx + 7, 50)],
                       fill=(180, 60, 40))
-        d.line([170, 64, 170, 48], fill=YELLOW, width=3)
-        d.polygon([(170, 44), (164, 52), (176, 52)], fill=YELLOW)
+        d.line([166, 64, 166, 48], fill=YELLOW, width=3)
+        d.polygon([(166, 44), (160, 52), (172, 52)], fill=YELLOW)
         # red warning triangle top right
         d.polygon([(179, 4), (189, 24), (169, 24)], fill=RED,
                   outline=(20, 20, 20))
         d.text((179, 14), "!", font=F_ART2_S, fill=YELLOW, anchor="mm")
     elif key == "kerch":
         d.rectangle([0, 0, w, h], fill=(14, 30, 80))
-        # (v26: a flat deck + a red sag did not read as a bridge being hit.
-        # Now a real bridge: two pylons, cables, a deck, and the middle span
-        # blown out and dipping into the water.)
+        # (v29: the user's bridge-silhouette reference — a proper suspension
+        # bridge: pointed towers, a sagging main cable, vertical suspenders.
+        # The middle span is still blown out below it.)
         # water at the bottom
         d.rectangle([0, 64, w, h], fill=(10, 22, 60))
         d.line([0, 68, w, 68], fill=(30, 60, 110), width=1)
         d.line([0, 74, w, 74], fill=(30, 60, 110), width=1)
-        # two pylons
-        d.rectangle([36, 10, 44, 44], fill=(150, 150, 150))
-        d.rectangle([168, 10, 176, 44], fill=(150, 150, 150))
-        # suspension cables from the pylon tops to the deck
-        for x0, y0, x1 in ((40, 10, 8), (40, 10, 120), (172, 10, 160),
-                           (172, 10, 188)):
-            d.line([x0, y0, x1, 40], fill=(150, 150, 150), width=1)
+        # two pointed towers (pylon + pointed cap, like the reference)
+        for tx in (36, 168):
+            d.rectangle([tx, 14, tx + 8, 44], fill=(150, 150, 150))
+            d.polygon([(tx, 14), (tx + 8, 14), (tx + 4, 6)],
+                      fill=(150, 150, 150))
+        # the main suspension cable: side spans + a sagging span between
+        # the tower tops (lowest at the middle, y30)
+        d.line([(8, 40), (40, 8)], fill=(200, 200, 200), width=1)
+        d.line([(40, 8), (55, 18), (70, 25), (85, 29), (98, 30),
+                (111, 29), (126, 25), (141, 18), (156, 11), (172, 8)],
+               fill=(200, 200, 200), width=1)
+        d.line([(172, 8), (188, 40)], fill=(200, 200, 200), width=1)
+        # vertical suspenders from the cable down to the intact deck
+        for sx, sy in ((55, 18), (70, 25), (85, 29), (100, 30), (180, 24)):
+            d.line([sx, sy, sx, 40], fill=(200, 200, 200), width=1)
         # gold deck, left and right of the blown-out middle span
         d.rectangle([8, 40, 120, 44], fill=(255, 205, 40))
         d.rectangle([160, 40, 188, 44], fill=(255, 205, 40))
@@ -710,14 +716,15 @@ def art_image(key, w, h):
         d.line([70, 52, 82, 64], fill=(20, 20, 20), width=3)
         d.line([70, 52, 58, 66], fill=(20, 20, 20), width=3)
         d.rectangle([61, 40, 67, 46], fill="white")
-        # diagonal BANNED rubber stamp, top-right
-        stamp(img, 142, 4, "BANNED")
-        # gold medal with a red circle-slash that fits the medal (the ban);
-        # moved down-left (v28) so the stamp no longer sits on it — the
-        # "B" in BANNED used to be hidden behind the medal's top edge
+        # diagonal BANNED rubber stamp, top-right (v29: moved 6px left so
+        # the thicker 3px border stays clear of the right edge)
+        stamp(img, 136, 4, "BANNED")
+        # gold medal with a BOLD red prohibition sign over it (v29: the
+        # user's reference is a thick red ring + thick diagonal bar, not a
+        # hairline — ring and slash are now 5px)
         d.ellipse([120, 28, 144, 52], fill=GOLD)
-        d.ellipse([120, 28, 144, 52], outline=RED, width=3)
-        d.line([122, 30, 142, 50], fill=RED, width=3)
+        d.ellipse([120, 28, 144, 52], outline=RED, width=5)
+        d.line([123, 31, 141, 49], fill=RED, width=5)
     elif key == "riyadh":
         d.rectangle([0, 0, w, h], fill=(10, 20, 50))
         _skyline(d, w, h, h - 30, (6, 12, 34), 11)
@@ -733,11 +740,14 @@ def art_image(key, w, h):
         # climbing toward the missile
         d.polygon([(24, 79), (60, 52), (104, 38), (108, 42), (64, 56),
                    (28, 79)], fill=RED)
-        # the Houthi missile, small, nose a few pixels from the tower wall
-        d.line([118, 36, 140, 18], fill=(220, 220, 220), width=4)
-        d.polygon([(140, 18), (148, 12), (142, 22)], fill=(220, 220, 220))
-        d.polygon([(118, 36), (110, 44), (114, 38)], fill=(180, 180, 180))
-        d.polygon([(116, 37), (106, 46), (112, 40)], fill=(255, 140, 40))
+        # the Houthi missile, sleek like the user's reference: a pointed
+        # nose, a tapered body, fins at the tail, and a long orange flame —
+        # nose a few pixels from the tower wall, a split second before impact
+        d.polygon([(148, 12), (120, 38), (116, 34)], fill=(220, 220, 220))
+        d.polygon([(118, 36), (108, 46), (114, 38)], fill=(180, 180, 180))
+        d.polygon([(116, 34), (106, 28), (112, 36)], fill=(180, 180, 180))
+        d.polygon([(118, 36), (102, 50), (110, 42)], fill=(255, 140, 40))
+        d.polygon([(116, 37), (106, 46), (110, 42)], fill=(255, 220, 80))
         # the explosion starting around the missile: orange burst, yellow
         # core, sparks, smoke and debris
         d.ellipse([138, 6, 158, 26], fill=(255, 140, 40))
