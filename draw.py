@@ -754,12 +754,11 @@ def art_image(key, w, h):
         d.rectangle([20, 10, 22, 22], fill="white")
         d.line([38, 8, 38, 32], fill=(20, 20, 20), width=2)
         _flag(d, 40, 10, 20, 12, "us")
-        # the vote, white text in a RED box, top-right (v37: the user asked
-        # for "VOTE" to be spelled out — the box now says 109-0 on top and
-        # VOTE underneath, so the count reads as a vote at a glance)
-        d.rectangle([142, 6, 192, 32], fill=RED)
-        d.text((167, 14), "109-0", font=F_ART2_S, fill="white", anchor="mm")
-        d.text((167, 26), "VOTE", font=F_SRC, fill="white", anchor="mm")
+        # the vote, white text in a RED box, top-right (v38: the user asked
+        # for VOTE ABOVE the number — VOTE on top, 109-0 underneath)
+        d.rectangle([142, 6, 192, 34], fill=RED)
+        d.text((167, 13), "VOTE", font=F_SRC, fill="white", anchor="mm")
+        d.text((167, 26), "109-0", font=F_ART2_S, fill="white", anchor="mm")
         # small globe below the vote box, blue + white grid lines
         d.ellipse([160, 36, 180, 56], fill=(30, 120, 200),
                   outline=(20, 20, 20), width=1)
@@ -780,9 +779,9 @@ def art_image(key, w, h):
         # track lanes under the runner
         d.line([0, 48, w, 48], fill=(222, 62, 48), width=2)
         d.line([0, 64, w, 64], fill=(222, 62, 48), width=2)
-        # speed lines behind the runner — he is moving fast
-        for sy in (30, 40, 50):
-            d.line([8, sy, 58, sy], fill="white", width=2)
+        # (v38: the 3 white "speed lines" are GONE — the user asked what
+        # they were for; they read as random white lines, not motion, so
+        # they are removed. The crowd + lanes already carry the energy.)
         # Kenyan flag, small, top-left (on the crowd band)
         d.rectangle([8, 6, 32, 10], fill=(20, 20, 20))
         d.rectangle([8, 10, 32, 11], fill="white")
