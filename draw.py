@@ -383,11 +383,19 @@ def _flag(d, x, y, w, h, kind):
         for i in range(7):
             d.rectangle([x, y + i * h / 7, x + w, y + (i + 1) * h / 7],
                         fill=(178, 34, 52) if i % 2 == 0 else "white")
-        d.rectangle([x, y, x + w * 0.4, y + h * 0.55], fill=(30, 50, 120))
+        cw, ch = w * 0.4, h * 0.55
+        d.rectangle([x, y, x + cw, y + ch], fill=(30, 50, 120))
+        # (v37 fix: the stars used a FIXED 7px/6px grid that did not scale
+        # with the flag — on the small 20x12 Greenland flag the stars
+        # spilled out of the canton and covered the whole flag, which is
+        # why they looked wrong. Now the stars scale with the canton and
+        # stay inside it.)
+        r = max(1.0, min(cw, ch) * 0.09)
         for sy in range(3):
             for sx in range(4):
-                d.ellipse([x + 3 + sx * 7, y + 3 + sy * 6,
-                           x + 6 + sx * 7, y + 6 + sy * 6], fill="white")
+                scx = x + cw * (0.14 + sx * 0.24)
+                scy = y + ch * (0.2 + sy * 0.3)
+                d.ellipse([scx - r, scy - r, scx + r, scy + r], fill="white")
     elif kind == "cn":
         d.rectangle([x, y, x + w, y + h], fill=(222, 41, 16))
         d.ellipse([x + 3, y + 3, x + 11, y + 11], fill=(255, 222, 0))
@@ -746,24 +754,36 @@ def art_image(key, w, h):
         d.rectangle([20, 10, 22, 22], fill="white")
         d.line([38, 8, 38, 32], fill=(20, 20, 20), width=2)
         _flag(d, 40, 10, 20, 12, "us")
-        # the vote, white text in a RED box, top-right
-        d.rectangle([142, 6, 192, 24], fill=RED)
-        d.text((167, 15), "109-0", font=F_ART2_S, fill="white", anchor="mm")
+        # the vote, white text in a RED box, top-right (v37: the user asked
+        # for "VOTE" to be spelled out — the box now says 109-0 on top and
+        # VOTE underneath, so the count reads as a vote at a glance)
+        d.rectangle([142, 6, 192, 32], fill=RED)
+        d.text((167, 14), "109-0", font=F_ART2_S, fill="white", anchor="mm")
+        d.text((167, 26), "VOTE", font=F_SRC, fill="white", anchor="mm")
         # small globe below the vote box, blue + white grid lines
-        d.ellipse([158, 28, 178, 48], fill=(30, 120, 200),
+        d.ellipse([160, 36, 180, 56], fill=(30, 120, 200),
                   outline=(20, 20, 20), width=1)
-        d.line([168, 28, 168, 48], fill="white", width=1)
-        d.line([158, 38, 178, 38], fill="white", width=1)
+        d.line([170, 36, 170, 56], fill="white", width=1)
+        d.line([160, 46, 180, 46], fill="white", width=1)
     elif key == "marathon":
-        # (v36: TOTAL REBUILD. The v35 version had too many small pieces —
-        # flag + box + lanes + a small runner + a stamp — and none of them
-        # was the picture. Now it is the top-1's picture, our own
-        # arrangement: a tan track, ONE big runner, ONE big BANNED stamp.
-        # The "3 YEARS" box + Kenyan flag stay, small at the top, as our
-        # character. No track lanes — the top-1 has none, and they were
-        # clutter.)
+        # (v37: the user said v36 still felt flat — a lone runner + a stamp
+        # on plain tan. Now it has a RACE around it: a crowd stand at the
+        # top, track lanes under the runner, and speed lines behind him.
+        # The "3 YEARS" box + Kenyan flag + big BANNED stamp stay.)
         d.rectangle([0, 0, w, h], fill=(228, 200, 150))
-        # Kenyan flag, small, top-left
+        # crowd stand: a dark band across the top, heads in a row
+        d.rectangle([0, 0, w, 16], fill=(40, 40, 60))
+        for hx in range(95, 190, 13):
+            d.ellipse([hx, 5, hx + 7, 12], fill=(230, 200, 160))
+        for hx in range(102, 190, 13):
+            d.ellipse([hx, 8, hx + 6, 14], fill=(120, 80, 50))
+        # track lanes under the runner
+        d.line([0, 48, w, 48], fill=(222, 62, 48), width=2)
+        d.line([0, 64, w, 64], fill=(222, 62, 48), width=2)
+        # speed lines behind the runner — he is moving fast
+        for sy in (30, 40, 50):
+            d.line([8, sy, 58, sy], fill="white", width=2)
+        # Kenyan flag, small, top-left (on the crowd band)
         d.rectangle([8, 6, 32, 10], fill=(20, 20, 20))
         d.rectangle([8, 10, 32, 11], fill="white")
         d.rectangle([8, 11, 32, 15], fill=(200, 30, 30))
